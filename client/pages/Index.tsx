@@ -160,9 +160,9 @@ export default function Index() {
       ? selectedDevice.width
       : selectedDevice.height;
 
-  // Better scaling calculation for larger previews
-  const maxPreviewWidth = 1000;
-  const maxPreviewHeight = 600;
+  // Much larger preview calculation
+  const maxPreviewWidth = 1200;
+  const maxPreviewHeight = 800;
   const scale = Math.min(
     maxPreviewWidth / currentWidth,
     maxPreviewHeight / currentHeight,
@@ -379,110 +379,79 @@ export default function Index() {
           </div>
         )}
 
-        {/* Preview */}
+        {/* Preview - Clean and Simple */}
         {proxyUrl && (
           <div className="bg-white rounded-lg shadow-sm border p-8">
             <div className="flex justify-center">
               <div
-                className="relative overflow-hidden rounded-lg shadow-xl"
+                className="relative bg-white shadow-lg rounded-lg overflow-hidden"
                 style={{
-                  width: previewWidth + 20,
-                  height: previewHeight + 20,
+                  width: previewWidth,
+                  height: previewHeight,
                 }}
               >
-                {/* Device Frame */}
-                <div
-                  className={cn(
-                    "absolute inset-0 rounded-lg",
-                    activeCategory === "mobile"
-                      ? "bg-gradient-to-b from-gray-800 to-gray-900 rounded-[2rem] p-4"
-                      : activeCategory === "tablet"
-                        ? "bg-gradient-to-b from-gray-800 to-gray-900 rounded-2xl p-3"
-                        : "bg-gray-200 p-2",
-                  )}
-                >
-                  {/* Mobile Frame Details */}
-                  {activeCategory === "mobile" && (
-                    <>
-                      {/* Notch/Dynamic Island */}
-                      <div className="absolute top-2 left-1/2 transform -translate-x-1/2 w-20 h-1.5 bg-gray-700 rounded-full z-10"></div>
-                      {/* Home Button */}
-                      <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 w-12 h-12 border-2 border-gray-600 rounded-full bg-gray-800 z-10"></div>
-                    </>
-                  )}
-
-                  {/* Tablet Frame Details */}
-                  {activeCategory === "tablet" && (
-                    <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 w-10 h-10 border-2 border-gray-600 rounded-full bg-gray-800 z-10"></div>
-                  )}
-
-                  {/* Preview Container */}
-                  <div
-                    className={cn(
-                      "w-full h-full bg-white overflow-hidden relative",
-                      activeCategory === "mobile"
-                        ? "rounded-3xl"
-                        : activeCategory === "tablet"
-                          ? "rounded-xl"
-                          : "rounded-md",
-                    )}
-                    style={{
-                      width: previewWidth,
-                      height: previewHeight,
-                      margin: activeCategory === "desktop" ? "8px" : "12px",
-                    }}
-                  >
-                    {isLoading ? (
-                      <div className="w-full h-full flex items-center justify-center bg-gray-100">
-                        <div className="text-center">
-                          <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-                          <p className="text-gray-600 font-medium">
-                            Loading preview...
-                          </p>
-                        </div>
-                      </div>
-                    ) : hasError ? (
-                      <div className="w-full h-full flex items-center justify-center bg-red-50">
-                        <div className="text-center p-6">
-                          <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
-                          <h3 className="font-semibold text-gray-800 mb-2">
-                            Cannot Load Website
-                          </h3>
-                          <p className="text-gray-600 text-sm mb-4">
-                            {errorMessage || "Failed to load website content"}
-                          </p>
-                          <div className="flex gap-2 justify-center">
-                            <Button
-                              onClick={handlePreview}
-                              variant="outline"
-                              size="sm"
-                            >
-                              Try Again
-                            </Button>
-                            <Button onClick={openInNewTab} size="sm">
-                              Open Original
-                            </Button>
-                          </div>
-                        </div>
-                      </div>
-                    ) : (
-                      <iframe
-                        ref={iframeRef}
-                        src={proxyUrl}
-                        className="w-full h-full border-0 bg-white"
-                        style={{
-                          width: currentWidth,
-                          height: currentHeight,
-                          transform: `scale(${scale})`,
-                          transformOrigin: "top left",
-                        }}
-                        title="Website Preview"
-                        onError={handleIframeError}
-                        onLoad={handleIframeLoad}
-                      />
-                    )}
+                {isLoading ? (
+                  <div className="w-full h-full flex items-center justify-center bg-gray-100">
+                    <div className="text-center">
+                      <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                      <p className="text-gray-600 font-medium">
+                        Loading preview...
+                      </p>
+                    </div>
                   </div>
-                </div>
+                ) : hasError ? (
+                  <div className="w-full h-full flex items-center justify-center bg-red-50">
+                    <div className="text-center p-6">
+                      <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
+                      <h3 className="font-semibold text-gray-800 mb-2">
+                        Cannot Load Website
+                      </h3>
+                      <p className="text-gray-600 text-sm mb-4">
+                        {errorMessage || "Failed to load website content"}
+                      </p>
+                      <div className="flex gap-2 justify-center">
+                        <Button
+                          onClick={handlePreview}
+                          variant="outline"
+                          size="sm"
+                        >
+                          Try Again
+                        </Button>
+                        <Button onClick={openInNewTab} size="sm">
+                          Open Original
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    <iframe
+                      ref={iframeRef}
+                      src={proxyUrl}
+                      className="w-full h-full border-0 bg-white"
+                      style={{
+                        width: currentWidth,
+                        height: currentHeight,
+                        transform: `scale(${scale})`,
+                        transformOrigin: "top left",
+                      }}
+                      title="Website Preview"
+                      onError={handleIframeError}
+                      onLoad={handleIframeLoad}
+                    />
+                    {/* Clean overlay button */}
+                    <div className="absolute top-4 right-4 z-10">
+                      <Button
+                        onClick={openInNewTab}
+                        size="sm"
+                        variant="outline"
+                        className="bg-white/90 backdrop-blur-sm"
+                      >
+                        <ExternalLink className="w-3 h-3" />
+                      </Button>
+                    </div>
+                  </>
+                )}
               </div>
             </div>
           </div>
