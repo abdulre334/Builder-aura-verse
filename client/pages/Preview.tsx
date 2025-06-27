@@ -71,16 +71,36 @@ export default function Preview() {
   const [hasError, setHasError] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [isRotated, setIsRotated] = useState(false);
-  const [zoomLevel, setZoomLevel] = useState("100");
+  const [zoomLevel, setZoomLevel] = useState("auto");
   const iframeRef = useRef<HTMLIFrameElement>(null);
 
+  // Calculate auto-fit zoom based on screen resolution
+  const calculateAutoFit = () => {
+    const screenWidth = window.innerWidth;
+    const screenHeight = window.innerHeight;
+    const availableWidth = screenWidth - 320 - 60; // sidebar width + padding
+    const availableHeight = screenHeight - 180; // header + padding
+
+    const scaleX = availableWidth / currentWidth;
+    const scaleY = availableHeight / currentHeight;
+
+    return Math.min(scaleX, scaleY, 2); // Max 200% zoom
+  };
+
+  // Enhanced zoom options with auto-fit
   const zoomOptions = [
+    { value: "auto", label: "Auto Fit" },
     { value: "25", label: "25%" },
+    { value: "33", label: "33%" },
     { value: "50", label: "50%" },
+    { value: "67", label: "67%" },
     { value: "75", label: "75%" },
+    { value: "90", label: "90%" },
     { value: "100", label: "100%" },
+    { value: "110", label: "110%" },
     { value: "125", label: "125%" },
     { value: "150", label: "150%" },
+    { value: "175", label: "175%" },
     { value: "200", label: "200%" },
   ];
 
@@ -110,6 +130,9 @@ export default function Preview() {
           });
         }
       }
+
+      // Set auto zoom by default
+      setZoomLevel("auto");
     }
   }, [searchParams]);
 
@@ -155,17 +178,35 @@ export default function Preview() {
     ? selectedDevice.width
     : selectedDevice.height;
 
-  // Calculate preview size with zoom
-  const scale = parseInt(zoomLevel) / 100;
-  const previewWidth = currentWidth * scale;
-  const previewHeight = currentHeight * scale;
+  // Calculate preview size with enhanced zoom
+  const getPreviewDimensions = () => {
+    let scale: number;
+
+    if (zoomLevel === "auto") {
+      scale = calculateAutoFit();
+    } else {
+      scale = parseInt(zoomLevel) / 100;
+    }
+
+    return {
+      width: currentWidth * scale,
+      height: currentHeight * scale,
+      scale,
+    };
+  };
+
+  const {
+    width: previewWidth,
+    height: previewHeight,
+    scale,
+  } = getPreviewDimensions();
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div className="min-h-screen bg-gray-50 flex overflow-hidden">
       {/* Sidebar */}
-      <div className="w-80 bg-white border-r border-gray-200 flex flex-col">
+      <div className="w-80 bg-white border-r border-gray-200 flex flex-col overflow-hidden">
         {/* Header */}
-        <div className="p-6 border-b border-gray-200">
+        <div className="p-6 border-b border-gray-200 flex-shrink-0">
           <div className="flex items-center gap-3 mb-4">
             <div className="p-2 bg-blue-500 rounded-lg">
               <Globe className="w-5 h-5 text-white" />
@@ -184,6 +225,37 @@ export default function Preview() {
             <ArrowLeft className="w-4 h-4" />
             Back to Home
           </Button>
+        </div>
+
+        {/* Zoom Controls - Moved to Top */}
+        <div className="p-4 border-b border-gray-200 flex-shrink-0">
+          <div className="space-y-3">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Zoom Level
+              </label>
+              <Select value={zoomLevel} onValueChange={setZoomLevel}>
+                <SelectTrigger className="w-full h-10">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {zoomOptions.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="text-center">
+              <Badge variant="outline" className="font-mono text-xs">
+                {zoomLevel === "auto"
+                  ? `${Math.round(scale * 100)}%`
+                  : zoomLevel + "%"}
+              </Badge>
+            </div>
+          </div>
         </div>
 
         {/* Device Categories */}
@@ -258,26 +330,8 @@ export default function Preview() {
               ))}
             </div>
 
-            {/* Controls */}
-            <div className="space-y-4 pt-4 border-t border-gray-200">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Zoom Level
-                </label>
-                <Select value={zoomLevel} onValueChange={setZoomLevel}>
-                  <SelectTrigger className="w-full">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {zoomOptions.map((option) => (
-                      <SelectItem key={option.value} value={option.value}>
-                        {option.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
+            {/* Additional Controls */}
+            <div className="space-y-3 pt-4 border-t border-gray-200">
               {(activeCategory === "tablet" || activeCategory === "mobile") && (
                 <Button
                   onClick={toggleRotation}
@@ -303,23 +357,21 @@ export default function Preview() {
           </div>
         </div>
 
-        {/* Footer */}
-        <div className="p-4 border-t border-gray-200">
+        {/* Footer Info */}
+        <div className="p-4 border-t border-gray-200 flex-shrink-0">
           <div className="text-center">
-            <Badge variant="outline" className="font-mono">
+            <Badge variant="outline" className="font-mono mb-2">
               {currentWidth} × {currentHeight}px
             </Badge>
-            <p className="text-xs text-gray-500 mt-2">
-              Showing at {zoomLevel}%
-            </p>
+            <p className="text-xs text-gray-500">Current Resolution</p>
           </div>
         </div>
       </div>
 
       {/* Main Preview Area */}
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col overflow-hidden">
         {/* Top Bar */}
-        <div className="bg-white border-b border-gray-200 p-4">
+        <div className="bg-white border-b border-gray-200 p-4 flex-shrink-0">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <h2 className="font-medium text-gray-900">
@@ -333,14 +385,16 @@ export default function Preview() {
           </div>
         </div>
 
-        {/* Preview Area */}
-        <div className="flex-1 flex items-center justify-center p-8 bg-gray-100">
+        {/* Preview Area - No Scroll Bars */}
+        <div className="flex-1 flex items-center justify-center p-8 bg-gray-100 overflow-hidden">
           {proxyUrl ? (
             <div
               className="bg-white shadow-xl overflow-hidden border border-gray-300"
               style={{
                 width: previewWidth,
                 height: previewHeight,
+                maxWidth: "100%",
+                maxHeight: "100%",
               }}
             >
               {isLoading ? (
@@ -379,6 +433,7 @@ export default function Preview() {
                     transform: `scale(${scale})`,
                     transformOrigin: "top left",
                     border: "none",
+                    overflow: "hidden",
                   }}
                   title="Website Preview"
                   onError={handleIframeError}
