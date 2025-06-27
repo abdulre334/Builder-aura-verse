@@ -57,17 +57,20 @@ const breakpoints: Breakpoint[] = [
 export default function Index() {
   const [url, setUrl] = useState("");
   const [currentUrl, setCurrentUrl] = useState("");
+  const [proxyUrl, setProxyUrl] = useState("");
   const [selectedBreakpoint, setSelectedBreakpoint] = useState(breakpoints[1]);
   const [showDeviceFrame, setShowDeviceFrame] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [hasError, setHasError] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
   const iframeRef = useRef<HTMLIFrameElement>(null);
 
-  const handlePreview = () => {
+  const handlePreview = async () => {
     if (!url.trim()) return;
 
     setIsLoading(true);
     setHasError(false);
+    setErrorMessage("");
 
     let formattedUrl = url.trim();
 
@@ -79,12 +82,23 @@ export default function Index() {
       formattedUrl = `https://${formattedUrl}`;
     }
 
-    setCurrentUrl(formattedUrl);
+    try {
+      // Validate URL first
+      new URL(formattedUrl);
 
-    // Simulate loading time and handle potential errors
-    setTimeout(() => {
+      setCurrentUrl(formattedUrl);
+      const proxyUrlFormatted = `/api/proxy?url=${encodeURIComponent(formattedUrl)}`;
+      setProxyUrl(proxyUrlFormatted);
+
+      // Small delay to show loading
+      setTimeout(() => {
+        setIsLoading(false);
+      }, 800);
+    } catch (error) {
+      setHasError(true);
+      setErrorMessage("Please enter a valid URL");
       setIsLoading(false);
-    }, 1500);
+    }
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -95,7 +109,15 @@ export default function Index() {
 
   const handleIframeError = () => {
     setHasError(true);
+    setErrorMessage(
+      "Failed to load website. The site might be temporarily unavailable.",
+    );
     setIsLoading(false);
+  };
+
+  const handleIframeLoad = () => {
+    setIsLoading(false);
+    setHasError(false);
   };
 
   const openInNewTab = () => {
@@ -244,7 +266,7 @@ export default function Index() {
         </div>
 
         {/* Preview Section */}
-        {currentUrl && (
+        {proxyUrl && (
           <div className="mb-8">
             <div className="flex items-center justify-center">
               <div
@@ -312,7 +334,7 @@ export default function Index() {
                           Loading preview...
                         </p>
                         <p className="text-gray-400 text-sm mt-2">
-                          This may take a moment
+                          Fetching website content
                         </p>
                       </div>
                     </div>
@@ -321,26 +343,34 @@ export default function Index() {
                       <div className="text-center p-8">
                         <AlertCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
                         <h3 className="text-lg font-semibold text-gray-800 mb-2">
-                          Preview Blocked
+                          Loading Error
                         </h3>
                         <p className="text-gray-600 mb-4">
-                          This website cannot be displayed in a frame due to
-                          security restrictions.
+                          {errorMessage || "Failed to load website content"}
                         </p>
-                        <Button
-                          onClick={openInNewTab}
-                          className="bg-blue-500 hover:bg-blue-600 text-white gap-2"
-                        >
-                          <ExternalLink className="w-4 h-4" />
-                          Open in New Tab
-                        </Button>
+                        <div className="flex gap-2 justify-center">
+                          <Button
+                            onClick={handlePreview}
+                            variant="outline"
+                            className="gap-2"
+                          >
+                            Try Again
+                          </Button>
+                          <Button
+                            onClick={openInNewTab}
+                            className="bg-blue-500 hover:bg-blue-600 text-white gap-2"
+                          >
+                            <ExternalLink className="w-4 h-4" />
+                            Open Original
+                          </Button>
+                        </div>
                       </div>
                     </div>
                   ) : (
                     <>
                       <iframe
                         ref={iframeRef}
-                        src={currentUrl}
+                        src={proxyUrl}
                         className="w-full h-full border-0"
                         style={{
                           width: selectedBreakpoint.width,
@@ -349,18 +379,8 @@ export default function Index() {
                           transformOrigin: "top left",
                         }}
                         title="Website Preview"
-                        sandbox="allow-same-origin allow-scripts allow-forms allow-links allow-popups"
                         onError={handleIframeError}
-                        onLoad={() => {
-                          // Check if iframe loaded successfully
-                          try {
-                            if (iframeRef.current?.contentDocument === null) {
-                              handleIframeError();
-                            }
-                          } catch (e) {
-                            handleIframeError();
-                          }
-                        }}
+                        onLoad={handleIframeLoad}
                       />
                       {/* Overlay for better UX */}
                       <div className="absolute top-4 right-4 z-10">
@@ -381,7 +401,7 @@ export default function Index() {
         )}
 
         {/* Empty State */}
-        {!currentUrl && (
+        {!proxyUrl && (
           <div className="text-center py-20">
             <div className="relative mx-auto w-32 h-32 mb-8">
               <div className="absolute inset-0 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full blur-2xl opacity-50"></div>
