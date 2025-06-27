@@ -160,12 +160,12 @@ export default function Index() {
       ? selectedDevice.width
       : selectedDevice.height;
 
-  // Much larger preview calculation
-  const maxPreviewWidth = 1200;
-  const maxPreviewHeight = 800;
+  // Much larger preview calculation - make it much bigger
+  const containerWidth = Math.min(window.innerWidth - 100, 1400);
+  const containerHeight = Math.min(window.innerHeight - 400, 900);
   const scale = Math.min(
-    maxPreviewWidth / currentWidth,
-    maxPreviewHeight / currentHeight,
+    containerWidth / currentWidth,
+    containerHeight / currentHeight,
     1,
   );
   const previewWidth = currentWidth * scale;
@@ -379,12 +379,12 @@ export default function Index() {
           </div>
         )}
 
-        {/* Preview - Clean and Simple */}
+        {/* Clean Preview - No Borders, No Device Frames */}
         {proxyUrl && (
-          <div className="bg-white rounded-lg shadow-sm border p-8">
+          <div className="bg-white rounded-lg shadow-sm border p-6">
             <div className="flex justify-center">
               <div
-                className="relative bg-white shadow-lg rounded-lg overflow-hidden"
+                className="relative bg-white shadow-xl rounded-lg overflow-hidden border border-gray-200"
                 style={{
                   width: previewWidth,
                   height: previewHeight,
@@ -424,33 +424,20 @@ export default function Index() {
                     </div>
                   </div>
                 ) : (
-                  <>
-                    <iframe
-                      ref={iframeRef}
-                      src={proxyUrl}
-                      className="w-full h-full border-0 bg-white"
-                      style={{
-                        width: currentWidth,
-                        height: currentHeight,
-                        transform: `scale(${scale})`,
-                        transformOrigin: "top left",
-                      }}
-                      title="Website Preview"
-                      onError={handleIframeError}
-                      onLoad={handleIframeLoad}
-                    />
-                    {/* Clean overlay button */}
-                    <div className="absolute top-4 right-4 z-10">
-                      <Button
-                        onClick={openInNewTab}
-                        size="sm"
-                        variant="outline"
-                        className="bg-white/90 backdrop-blur-sm"
-                      >
-                        <ExternalLink className="w-3 h-3" />
-                      </Button>
-                    </div>
-                  </>
+                  <iframe
+                    ref={iframeRef}
+                    src={proxyUrl}
+                    className="w-full h-full border-0 bg-white"
+                    style={{
+                      width: currentWidth,
+                      height: currentHeight,
+                      transform: `scale(${scale})`,
+                      transformOrigin: "top left",
+                    }}
+                    title="Website Preview"
+                    onError={handleIframeError}
+                    onLoad={handleIframeLoad}
+                  />
                 )}
               </div>
             </div>
