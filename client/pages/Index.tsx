@@ -5,6 +5,13 @@ import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Slider } from "@/components/ui/slider";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   Monitor,
   Tablet,
   Smartphone,
@@ -13,6 +20,7 @@ import {
   AlertCircle,
   RotateCcw,
   Settings,
+  Maximize2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -68,7 +76,19 @@ export default function Index() {
   const [hasError, setHasError] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [isRotated, setIsRotated] = useState(false);
+  const [zoomLevel, setZoomLevel] = useState("auto");
   const iframeRef = useRef<HTMLIFrameElement>(null);
+
+  const zoomOptions = [
+    { value: "auto", label: "Auto Fit" },
+    { value: "25", label: "25%" },
+    { value: "50", label: "50%" },
+    { value: "75", label: "75%" },
+    { value: "100", label: "100%" },
+    { value: "125", label: "125%" },
+    { value: "150", label: "150%" },
+    { value: "200", label: "200%" },
+  ];
 
   const handlePreview = async () => {
     if (!url.trim()) return;
@@ -127,6 +147,19 @@ export default function Index() {
     }
   };
 
+  const openPreviewMode = () => {
+    if (proxyUrl) {
+      const params = new URLSearchParams({
+        url: currentUrl,
+        width: currentWidth.toString(),
+        height: currentHeight.toString(),
+        device: selectedDevice.name,
+        category: activeCategory,
+      });
+      window.open(`/preview?${params.toString()}`, "_blank");
+    }
+  };
+
   const handleCategoryChange = (category: DeviceCategory) => {
     setActiveCategory(category);
     setSelectedDevice(devices[category][0]);
@@ -160,16 +193,35 @@ export default function Index() {
       ? selectedDevice.width
       : selectedDevice.height;
 
-  // Much larger preview calculation - maximum possible size
-  const containerWidth = Math.min(window.innerWidth - 80, 1400);
-  const containerHeight = Math.min(window.innerHeight - 350, 900);
-  const scale = Math.min(
-    containerWidth / currentWidth,
-    containerHeight / currentHeight,
-    1,
-  );
-  const previewWidth = currentWidth * scale;
-  const previewHeight = currentHeight * scale;
+  // Calculate preview size with zoom
+  const getPreviewDimensions = () => {
+    let scale: number;
+
+    if (zoomLevel === "auto") {
+      // Much larger auto-fit calculation
+      const containerWidth = Math.min(window.innerWidth - 80, 1600);
+      const containerHeight = Math.min(window.innerHeight - 350, 1000);
+      scale = Math.min(
+        containerWidth / currentWidth,
+        containerHeight / currentHeight,
+        1.5, // Allow up to 150% for auto
+      );
+    } else {
+      scale = parseInt(zoomLevel) / 100;
+    }
+
+    return {
+      width: currentWidth * scale,
+      height: currentHeight * scale,
+      scale,
+    };
+  };
+
+  const {
+    width: previewWidth,
+    height: previewHeight,
+    scale,
+  } = getPreviewDimensions();
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -353,6 +405,23 @@ export default function Index() {
                 )}
               </div>
               <div className="flex items-center gap-3">
+                {/* Zoom Control */}
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-gray-600">Zoom:</span>
+                  <Select value={zoomLevel} onValueChange={setZoomLevel}>
+                    <SelectTrigger className="w-32">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {zoomOptions.map((option) => (
+                        <SelectItem key={option.value} value={option.value}>
+                          {option.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
                 {(activeCategory === "tablet" ||
                   activeCategory === "mobile") && (
                   <Button
@@ -365,6 +434,17 @@ export default function Index() {
                     {isRotated ? "Portrait" : "Landscape"}
                   </Button>
                 )}
+
+                <Button
+                  onClick={openPreviewMode}
+                  variant="outline"
+                  size="sm"
+                  className="gap-2"
+                >
+                  <Maximize2 className="w-4 h-4" />
+                  Preview Mode
+                </Button>
+
                 <Button
                   onClick={openInNewTab}
                   variant="outline"
@@ -379,12 +459,12 @@ export default function Index() {
           </div>
         )}
 
-        {/* Completely Clean Preview - NO FRAMES, NO BORDERS */}
+        {/* Much Bigger Preview */}
         {proxyUrl && (
           <div className="bg-white rounded-lg shadow-sm border p-6">
             <div className="flex justify-center">
               <div
-                className="bg-white shadow-lg overflow-hidden"
+                className="bg-white shadow-xl overflow-hidden border border-gray-200"
                 style={{
                   width: previewWidth,
                   height: previewHeight,
@@ -393,20 +473,20 @@ export default function Index() {
                 {isLoading ? (
                   <div className="w-full h-full flex items-center justify-center bg-gray-100">
                     <div className="text-center">
-                      <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-                      <p className="text-gray-600 font-medium">
+                      <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                      <p className="text-gray-600 font-medium text-lg">
                         Loading preview...
                       </p>
                     </div>
                   </div>
                 ) : hasError ? (
                   <div className="w-full h-full flex items-center justify-center bg-red-50">
-                    <div className="text-center p-6">
-                      <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
-                      <h3 className="font-semibold text-gray-800 mb-2">
+                    <div className="text-center p-8">
+                      <AlertCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
+                      <h3 className="text-lg font-semibold text-gray-800 mb-2">
                         Cannot Load Website
                       </h3>
-                      <p className="text-gray-600 text-sm mb-4">
+                      <p className="text-gray-600 mb-4">
                         {errorMessage || "Failed to load website content"}
                       </p>
                       <div className="flex gap-2 justify-center">
@@ -442,6 +522,11 @@ export default function Index() {
                 )}
               </div>
             </div>
+            {/* Preview Info */}
+            <div className="text-center mt-4 text-sm text-gray-500">
+              Showing at {Math.round(scale * 100)}% • {currentWidth} ×{" "}
+              {currentHeight}px
+            </div>
           </div>
         )}
 
@@ -456,8 +541,8 @@ export default function Index() {
             </h2>
             <p className="text-gray-600 max-w-2xl mx-auto mb-6">
               Enter a website URL above to see how it looks on different devices
-              and screen sizes. Use the sliders to customize the exact
-              dimensions you want to test.
+              and screen sizes. Use the zoom controls and custom dimensions for
+              precise testing.
             </p>
             <div className="flex items-center justify-center gap-8 text-sm text-gray-500">
               <div className="flex items-center gap-2">
