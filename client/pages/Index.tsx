@@ -160,9 +160,9 @@ export default function Index() {
       ? selectedDevice.width
       : selectedDevice.height;
 
-  // Much larger preview calculation - make it much bigger
-  const containerWidth = Math.min(window.innerWidth - 100, 1400);
-  const containerHeight = Math.min(window.innerHeight - 400, 900);
+  // Much larger preview calculation - maximum possible size
+  const containerWidth = Math.min(window.innerWidth - 80, 1400);
+  const containerHeight = Math.min(window.innerHeight - 350, 900);
   const scale = Math.min(
     containerWidth / currentWidth,
     containerHeight / currentHeight,
@@ -379,12 +379,12 @@ export default function Index() {
           </div>
         )}
 
-        {/* Clean Preview - No Borders, No Device Frames */}
+        {/* Completely Clean Preview - NO FRAMES, NO BORDERS */}
         {proxyUrl && (
           <div className="bg-white rounded-lg shadow-sm border p-6">
             <div className="flex justify-center">
               <div
-                className="relative bg-white shadow-xl rounded-lg overflow-hidden border border-gray-200"
+                className="bg-white shadow-lg overflow-hidden"
                 style={{
                   width: previewWidth,
                   height: previewHeight,
@@ -427,12 +427,13 @@ export default function Index() {
                   <iframe
                     ref={iframeRef}
                     src={proxyUrl}
-                    className="w-full h-full border-0 bg-white"
+                    className="w-full h-full"
                     style={{
                       width: currentWidth,
                       height: currentHeight,
                       transform: `scale(${scale})`,
                       transformOrigin: "top left",
+                      border: "none",
                     }}
                     title="Website Preview"
                     onError={handleIframeError}
