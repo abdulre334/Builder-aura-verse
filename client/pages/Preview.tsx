@@ -215,8 +215,40 @@ export default function Preview() {
   };
 
   const handleIframeLoad = () => {
-    setIsLoading(false);
-    setHasError(false);
+    // Wait for all resources to load completely (CSS, images, icons, fonts)
+    const iframe = iframeRef.current;
+    if (iframe && iframe.contentWindow) {
+      try {
+        const iframeDoc =
+          iframe.contentDocument || iframe.contentWindow.document;
+
+        // Check if document and all resources are fully loaded
+        if (iframeDoc.readyState === "complete") {
+          // Extra delay to ensure CSS, fonts, and icons are fully rendered
+          setTimeout(() => {
+            setIsLoading(false);
+            setHasError(false);
+          }, 2000); // Longer delay for complete rendering
+        } else {
+          // Document not ready, wait longer
+          setTimeout(() => {
+            setIsLoading(false);
+            setHasError(false);
+          }, 3000);
+        }
+      } catch (e) {
+        // Cross-origin restrictions, use longer timeout
+        setTimeout(() => {
+          setIsLoading(false);
+          setHasError(false);
+        }, 3000);
+      }
+    } else {
+      setTimeout(() => {
+        setIsLoading(false);
+        setHasError(false);
+      }, 2500);
+    }
   };
 
   const openInNewTab = () => {
