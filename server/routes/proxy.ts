@@ -78,9 +78,9 @@ export const handleProxy: RequestHandler = async (req, res) => {
 
     console.log(`📄 Content length: ${content.length} characters`);
 
-    // MINIMAL processing for maximum speed
+    // FULL PAGE RENDERING like real responsive checkers
     content = content
-      // Remove frame blocking only
+      // Remove frame blocking
       .replace(
         /<meta[^>]*http-equiv=['"](X-Frame-Options|x-frame-options)['"'][^>]*>/gi,
         "",
@@ -89,29 +89,135 @@ export const handleProxy: RequestHandler = async (req, res) => {
         /<meta[^>]*http-equiv=['"](Content-Security-Policy|content-security-policy)['"'][^>]*>/gi,
         "",
       )
-      // Add base tag for resource resolution
+      .replace(
+        /<meta[^>]*name=['"](referrer)['"'][^>]*>/gi,
+        '<meta name="referrer" content="unsafe-url">',
+      )
+
+      // Fix ALL resource URLs for complete rendering
+      .replace(/src=['"]([^'"]*)['"]/gi, (match, src) => {
+        if (
+          src.startsWith("data:") ||
+          src.startsWith("blob:") ||
+          src.startsWith("javascript:")
+        )
+          return match;
+
+        try {
+          if (src.startsWith("//")) {
+            return `src="${targetUrl.protocol}${src}"`;
+          } else if (src.startsWith("/")) {
+            return `src="${targetUrl.origin}${src}"`;
+          } else if (!src.startsWith("http")) {
+            const absoluteUrl = new URL(src, targetUrl.href);
+            return `src="${absoluteUrl.href}"`;
+          }
+        } catch (e) {
+          console.warn(`⚠️ Failed to resolve src: ${src}`);
+        }
+        return match;
+      })
+
+      .replace(/href=['"]([^'"]*)['"]/gi, (match, href) => {
+        if (
+          href.startsWith("data:") ||
+          href.startsWith("javascript:") ||
+          href.startsWith("#") ||
+          href.startsWith("mailto:") ||
+          href.startsWith("tel:")
+        )
+          return match;
+
+        try {
+          if (href.startsWith("//")) {
+            return `href="${targetUrl.protocol}${href}"`;
+          } else if (href.startsWith("/")) {
+            return `href="${targetUrl.origin}${href}"`;
+          } else if (!href.startsWith("http")) {
+            const absoluteUrl = new URL(href, targetUrl.href);
+            return `href="${absoluteUrl.href}"`;
+          }
+        } catch (e) {
+          console.warn(`⚠️ Failed to resolve href: ${href}`);
+        }
+        return match;
+      })
+
+      // Fix CSS URLs
+      .replace(/url\(['"]?([^'"]*?)['"]?\)/gi, (match, url) => {
+        if (url.startsWith("data:") || url.startsWith("blob:")) return match;
+
+        try {
+          if (url.startsWith("//")) {
+            return `url("${targetUrl.protocol}${url}")`;
+          } else if (url.startsWith("/")) {
+            return `url("${targetUrl.origin}${url}")`;
+          } else if (!url.startsWith("http")) {
+            const absoluteUrl = new URL(url, targetUrl.href);
+            return `url("${absoluteUrl.href}")`;
+          }
+        } catch (e) {
+          console.warn(`⚠️ Failed to resolve CSS url: ${url}`);
+        }
+        return match;
+      })
+
+      // Add comprehensive base tag
       .replace(/<head>/i, `<head><base href="${targetUrl.origin}/">`)
 
-      // Inject minimal compatibility script
+      // Inject full page rendering compatibility script
       .replace(
         /<\/head>/i,
         `
+        <style>
+          /* Full page rendering styles */
+          * { box-sizing: border-box !important; }
+          html, body {
+            width: 100% !important;
+            height: 100% !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            overflow-x: auto !important;
+          }
+          /* Ensure fonts load properly */
+          * {
+            -webkit-font-smoothing: antialiased !important;
+            text-rendering: optimizeLegibility !important;
+          }
+        </style>
         <script>
           (function() {
             try {
-              // Minimal frame-busting protection
+              // Full frame-busting protection
               if (window.top !== window.self) {
                 Object.defineProperty(window, 'top', { value: window.self, writable: false });
                 Object.defineProperty(window, 'parent', { value: window.self, writable: false });
+                Object.defineProperty(window, 'frameElement', { value: null, writable: false });
               }
-              
-              // Quick lazy loading fix
+
+              // Force load all lazy content for full page rendering
               document.addEventListener('DOMContentLoaded', function() {
-                const lazyImages = document.querySelectorAll('img[data-src], img[loading="lazy"]');
+                // Load lazy images
+                const lazyImages = document.querySelectorAll('img[data-src], img[data-lazy-src], img[loading="lazy"]');
                 lazyImages.forEach(function(img) {
                   if (img.dataset.src) img.src = img.dataset.src;
+                  if (img.dataset.lazySrc) img.src = img.dataset.lazySrc;
                   img.loading = 'eager';
                 });
+
+                // Load lazy iframes
+                const lazyIframes = document.querySelectorAll('iframe[data-src], iframe[loading="lazy"]');
+                lazyIframes.forEach(function(iframe) {
+                  if (iframe.dataset.src) iframe.src = iframe.dataset.src;
+                  iframe.loading = 'eager';
+                });
+
+                // Force trigger scroll and resize events for responsive behavior
+                setTimeout(() => {
+                  window.dispatchEvent(new Event('scroll'));
+                  window.dispatchEvent(new Event('resize'));
+                  window.dispatchEvent(new Event('load'));
+                }, 100);
               });
             } catch (e) {}
           })();
