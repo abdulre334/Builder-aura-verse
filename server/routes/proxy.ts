@@ -171,12 +171,12 @@ export const handleProxy: RequestHandler = async (req, res) => {
       // Add comprehensive base tag
       .replace(/<head>/i, `<head><base href="${targetUrl.origin}/">`)
 
-      // Inject REAL-TIME compatibility script
+      // Inject ENHANCED real-time compatibility script
       .replace(
         /<\/head>/i,
         `
         <style>
-          /* Force proper rendering */
+          /* Ultra-fast rendering optimizations */
           * { box-sizing: border-box !important; }
           html, body {
             width: 100% !important;
@@ -185,9 +185,31 @@ export const handleProxy: RequestHandler = async (req, res) => {
             padding: 0 !important;
             overflow-x: auto !important;
           }
-          /* Hide loading indicators that might interfere */
-          .loading, .loader, .spinner, .preloader { display: none !important; }
+          /* Performance optimizations */
+          img { image-rendering: auto !important; }
+          * { -webkit-font-smoothing: antialiased !important; }
+          /* Hide interfering elements */
+          .loading, .loader, .spinner, .preloader,
+          [class*="loading"], [id*="loading"],
+          [class*="loader"], [id*="loader"] {
+            display: none !important;
+            visibility: hidden !important;
+          }
         </style>
+        <script>
+          // Enhanced real-time loading
+          (function() {
+            try {
+              // Speed up loading
+              if (window.requestIdleCallback) {
+                window.requestIdleCallback = window.requestAnimationFrame;
+              }
+              // Remove blocking scripts
+              const scripts = document.querySelectorAll('script[src*="analytics"], script[src*="tracking"], script[src*="gtag"]');
+              scripts.forEach(s => s.remove());
+            } catch(e) {}
+          })();
+        </script>
         <script>
           (function() {
             console.log('🚀 RespoCheck Real-time Crawling Active');
