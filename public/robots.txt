@@ -1,14 +1,15 @@
-User-agent: Googlebot
-Allow: /
-
-User-agent: Bingbot
-Allow: /
-
-User-agent: Twitterbot
-Allow: /
-
-User-agent: facebookexternalhit
-Allow: /
-
 User-agent: *
 Allow: /
+
+# Sitemap
+Sitemap: https://respocheck.com/sitemap.xml
+
+# Block access to API endpoints from crawlers
+Disallow: /api/
+
+# Allow all other pages
+Allow: /
+Allow: /preview
+
+# Crawl delay
+Crawl-delay: 1
