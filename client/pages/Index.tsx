@@ -258,7 +258,7 @@ export default function Index() {
   } = getPreviewDimensions();
 
   return (
-    <div className="h-screen flex bg-slate-50">
+    <div className="h-screen flex bg-gradient-to-br from-slate-700 via-blue-800 to-indigo-900 hover:from-slate-50 hover:via-blue-50 hover:to-indigo-50 transition-all duration-500">
       {/* Sidebar */}
       <div
         className={cn(
