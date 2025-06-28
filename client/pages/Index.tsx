@@ -175,6 +175,17 @@ export default function Index() {
     setSelectedDevice(devices[category][0]);
     setIsRotated(false);
     setUseCustomSize(false);
+
+    // Auto-reload when switching categories
+    if (proxyUrl) {
+      setIsLoading(true);
+      setHasError(false);
+      setTimeout(() => {
+        if (iframeRef.current) {
+          iframeRef.current.src = iframeRef.current.src;
+        }
+      }, 50);
+    }
   };
 
   const handleDeviceSelect = (device: Device) => {
