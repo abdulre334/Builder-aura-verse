@@ -137,8 +137,40 @@ export default function Index() {
   };
 
   const handleIframeLoad = () => {
-    setIsLoading(false);
-    setHasError(false);
+    // Wait for all resources to load (CSS, images, icons, etc.)
+    const iframe = iframeRef.current;
+    if (iframe && iframe.contentWindow) {
+      try {
+        const iframeDoc =
+          iframe.contentDocument || iframe.contentWindow.document;
+
+        // Wait for document ready state and all resources
+        if (iframeDoc.readyState === "complete") {
+          // Additional delay to ensure all CSS and icons are rendered
+          setTimeout(() => {
+            setIsLoading(false);
+            setHasError(false);
+          }, 1500); // Give extra time for full rendering
+        } else {
+          // If not ready, wait a bit more
+          setTimeout(() => {
+            setIsLoading(false);
+            setHasError(false);
+          }, 2000);
+        }
+      } catch (e) {
+        // Cross-origin issues, just wait a bit longer
+        setTimeout(() => {
+          setIsLoading(false);
+          setHasError(false);
+        }, 2000);
+      }
+    } else {
+      setTimeout(() => {
+        setIsLoading(false);
+        setHasError(false);
+      }, 1500);
+    }
   };
 
   const openInNewTab = () => {
