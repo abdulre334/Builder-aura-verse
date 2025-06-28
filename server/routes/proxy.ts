@@ -82,21 +82,17 @@ export const handleProxy: RequestHandler = async (req, res) => {
 
     let content = await response.text();
 
-    if (!content || content.length < 100) {
+    if (!content || content.length < 50) {
       throw new Error("Received empty or invalid content");
     }
 
     console.log(`📄 Content length: ${content.length} characters`);
 
-    // AGGRESSIVE content processing for real crawling
+    // ULTRA-FAST content processing for real-time loading
     content = content
-      // Remove ALL iframe blocking mechanisms
+      // Remove iframe blocking (faster regex)
       .replace(
-        /<meta[^>]*http-equiv=['"](X-Frame-Options|x-frame-options)['"'][^>]*>/gi,
-        "",
-      )
-      .replace(
-        /<meta[^>]*http-equiv=['"](Content-Security-Policy|content-security-policy)['"'][^>]*>/gi,
+        /(?:<meta[^>]*?(?:http-equiv|name)=['"]?(?:X-Frame-Options|x-frame-options|Content-Security-Policy|content-security-policy)['"]?[^>]*?>)/gi,
         "",
       )
       .replace(
