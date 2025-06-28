@@ -108,8 +108,14 @@ export default function Index() {
     try {
       new URL(formattedUrl);
       setCurrentUrl(formattedUrl);
-      const proxyUrlFormatted = `/api/proxy?url=${encodeURIComponent(formattedUrl)}`;
+      const proxyUrlFormatted = `/api/proxy?url=${encodeURIComponent(formattedUrl)}&t=${Date.now()}`;
       setProxyUrl(proxyUrlFormatted);
+
+      // Ultra-fast loading - stop loading after 2 seconds max
+      setTimeout(() => {
+        setIsLoading(false);
+        setHasError(false);
+      }, 2000);
     } catch (error) {
       setHasError(true);
       setErrorMessage("Please enter a valid URL");
