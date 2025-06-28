@@ -214,27 +214,79 @@ export default function Preview() {
   };
 
   const handleIframeLoad = () => {
-    // Enhanced loading for complete resource fetching
+    // Advanced real-time crawling for Preview mode
     const iframe = iframeRef.current;
     if (iframe && iframe.contentWindow) {
       try {
         const iframeDoc =
           iframe.contentDocument || iframe.contentWindow.document;
 
-        const checkComplete = () => {
+        const performRealTimeCrawl = () => {
           if (iframeDoc.readyState === "complete") {
-            // Wait longer for fonts, CSS, and images to fully render
-            setTimeout(() => {
-              setIsLoading(false);
-              setHasError(false);
-            }, 4000); // Extended wait for complete rendering
+            // Real-time resource monitoring
+            const monitorResources = () => {
+              const images = iframeDoc.querySelectorAll("img");
+              const stylesheets = iframeDoc.querySelectorAll(
+                "link[rel='stylesheet']",
+              );
+              const scripts = iframeDoc.querySelectorAll("script[src]");
+
+              let resourcesLoaded = 0;
+              const totalResources =
+                images.length + stylesheets.length + scripts.length;
+
+              const checkAllLoaded = () => {
+                resourcesLoaded++;
+                if (resourcesLoaded >= totalResources) {
+                  // All resources loaded in real-time
+                  setTimeout(() => {
+                    setIsLoading(false);
+                    setHasError(false);
+                  }, 1000);
+                }
+              };
+
+              if (totalResources === 0) {
+                setTimeout(() => {
+                  setIsLoading(false);
+                  setHasError(false);
+                }, 2000);
+                return;
+              }
+
+              // Monitor each resource type in real-time
+              images.forEach((img) => {
+                if (img.complete && img.naturalHeight > 0) {
+                  checkAllLoaded();
+                } else {
+                  img.addEventListener("load", checkAllLoaded, { once: true });
+                  img.addEventListener("error", checkAllLoaded, { once: true });
+                }
+              });
+
+              stylesheets.forEach((link) => {
+                if (link.sheet) {
+                  checkAllLoaded();
+                } else {
+                  link.addEventListener("load", checkAllLoaded, { once: true });
+                  link.addEventListener("error", checkAllLoaded, {
+                    once: true,
+                  });
+                }
+              });
+
+              scripts.forEach(() => checkAllLoaded());
+            };
+
+            setTimeout(monitorResources, 500);
           } else {
-            setTimeout(checkComplete, 500);
+            setTimeout(performRealTimeCrawl, 300);
           }
         };
 
-        checkComplete();
+        performRealTimeCrawl();
       } catch (e) {
+        // Cross-origin handling with extended real-time waiting
         setTimeout(() => {
           setIsLoading(false);
           setHasError(false);
@@ -295,70 +347,97 @@ export default function Preview() {
   } = getPreviewDimensions();
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-slate-900 to-black overflow-hidden">
-      {/* Professional Header with Device Toolbar */}
-      <div className="bg-black/50 border-b border-gray-700/50 backdrop-blur-xl">
-        <div className="flex items-center justify-between px-6 py-3">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 overflow-hidden">
+      {/* Enhanced Header with Logo and Device Toolbar */}
+      <style jsx>{`
+        @keyframes logoFloat {
+          0%,
+          100% {
+            transform: translateY(0px) rotate(0deg);
+          }
+          50% {
+            transform: translateY(-5px) rotate(3deg);
+          }
+        }
+        .logo-animated {
+          animation: logoFloat 3s ease-in-out infinite;
+        }
+        @media (max-width: 768px) {
+          .mobile-hidden {
+            display: none;
+          }
+          .mobile-compact {
+            padding: 8px;
+            font-size: 12px;
+          }
+        }
+      `}</style>
+
+      <div className="bg-white/90 backdrop-blur-xl border-b border-slate-200/50">
+        <div className="flex flex-col sm:flex-row items-center justify-between px-4 sm:px-6 py-3">
           {/* Left Side - Logo & Back */}
-          <div className="flex items-center gap-6">
+          <div className="flex items-center gap-4 sm:gap-6 mb-2 sm:mb-0">
             <Button
               onClick={goHome}
               variant="ghost"
               size="sm"
-              className="text-gray-300 hover:text-white hover:bg-white/10"
+              className="text-gray-600 hover:text-gray-800 hover:bg-gray-100"
             >
               <ArrowLeft className="w-4 h-4 mr-2" />
-              Back
+              <span className="hidden sm:inline">Back</span>
             </Button>
             <div className="flex items-center gap-3">
               <img
-                src="https://cdn.builder.io/api/v1/image/assets%2F2f9afe8dc22849b186c0fc07b1bbb4f9%2F5fe2031174b94cc7b66976474410e316?format=webp&width=800"
-                alt="RespoCheck Logo"
-                className="w-8 h-8 object-contain"
+                src="https://cdn.builder.io/api/v1/image/assets%2F2f9afe8dc22849b186c0fc07b1bbb4f9%2F2f9de9187e1c4134988baa17156cc2c7?format=webp&width=800"
+                alt="RespoCheck"
+                className="w-8 h-8 sm:w-10 sm:h-10 object-contain logo-animated"
               />
-              <div>
-                <h1 className="text-white font-semibold">RespoCheck</h1>
-              </div>
             </div>
           </div>
 
-          {/* Center - Device Toolbar */}
-          <div className="flex items-center gap-2 bg-gray-800/50 rounded-lg p-2">
-            {devices.map((device) => (
-              <Button
-                key={device.id}
-                onClick={() => handleDeviceSelect(device)}
-                variant="ghost"
-                size="sm"
-                className={cn(
-                  "flex flex-col items-center gap-1 h-auto p-3 text-xs transition-all",
-                  selectedDevice.id === device.id
-                    ? "bg-blue-500 text-white"
-                    : "text-gray-400 hover:text-white hover:bg-white/10",
-                )}
-                title={`${device.name} (${device.width}×${device.height})`}
-              >
-                {device.icon}
-                <span className="font-medium">{device.width}</span>
-              </Button>
-            ))}
+          {/* Center - Responsive Device Toolbar */}
+          <div className="flex flex-wrap items-center justify-center gap-1 sm:gap-2 bg-white/80 rounded-lg p-2">
+            {devices
+              .slice(0, window.innerWidth < 768 ? 6 : devices.length)
+              .map((device) => (
+                <Button
+                  key={device.id}
+                  onClick={() => handleDeviceSelect(device)}
+                  variant="ghost"
+                  size="sm"
+                  className={cn(
+                    "flex flex-col items-center gap-1 h-auto p-2 sm:p-3 text-xs transition-all mobile-compact",
+                    selectedDevice.id === device.id
+                      ? "bg-blue-500 text-white"
+                      : "text-gray-500 hover:text-gray-700 hover:bg-gray-100",
+                  )}
+                  title={`${device.name} (${device.width}×${device.height})`}
+                >
+                  {device.icon}
+                  <span className="font-medium hidden sm:block">
+                    {device.width}
+                  </span>
+                </Button>
+              ))}
           </div>
 
           {/* Right Side - Controls */}
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 sm:gap-4 mt-2 sm:mt-0">
             {/* Zoom Control */}
             <div className="flex items-center gap-2">
-              <span className="text-gray-300 text-sm">Zoom:</span>
+              <span className="text-gray-600 text-sm hidden sm:inline">
+                Zoom:
+              </span>
               <Select value={zoomLevel} onValueChange={setZoomLevel}>
-                <SelectTrigger className="w-24 h-8 bg-gray-800 border-gray-600 text-white">
+                <SelectTrigger className="w-20 sm:w-24 h-8 bg-white border-gray-300">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent className="bg-gray-800 border-gray-600">
+                <SelectContent className="bg-white border-gray-300">
                   {zoomOptions.map((option) => (
                     <SelectItem
                       key={option.value}
                       value={option.value}
-                      className="text-white hover:bg-gray-700"
+                      className="text-gray-700 hover:bg-gray-100"
                     >
                       {option.label}
                     </SelectItem>
@@ -374,7 +453,7 @@ export default function Preview() {
                 onClick={toggleRotation}
                 variant="ghost"
                 size="sm"
-                className="text-gray-300 hover:text-white hover:bg-white/10"
+                className="text-gray-600 hover:text-gray-800 hover:bg-gray-100"
               >
                 <RotateCcw className="w-4 h-4" />
               </Button>
@@ -384,7 +463,7 @@ export default function Preview() {
               onClick={openInNewTab}
               variant="ghost"
               size="sm"
-              className="text-gray-300 hover:text-white hover:bg-white/10"
+              className="text-gray-600 hover:text-gray-800 hover:bg-gray-100"
             >
               <ExternalLink className="w-4 h-4" />
             </Button>
@@ -392,63 +471,65 @@ export default function Preview() {
         </div>
 
         {/* Device Info Bar */}
-        <div className="px-6 py-2 bg-gray-800/30 border-t border-gray-700/30">
-          <div className="flex items-center justify-between text-sm">
-            <div className="flex items-center gap-4 text-gray-300">
-              <span className="font-medium text-white">
+        <div className="px-4 sm:px-6 py-2 bg-white/60 border-t border-slate-200/30">
+          <div className="flex flex-col sm:flex-row items-center justify-between text-sm gap-2">
+            <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-gray-600">
+              <span className="font-medium text-gray-800">
                 {selectedDevice.name}
               </span>
               <Badge
                 variant="outline"
-                className="border-gray-600 text-gray-300"
+                className="border-gray-400 text-gray-600"
               >
                 {currentWidth} × {currentHeight}px
               </Badge>
-              <span>
-                {Math.round(scale * 100)}% •{" "}
-                {currentUrl && new URL(currentUrl).hostname}
+              <span className="text-xs sm:text-sm">
+                {Math.round(scale * 100)}% • Real-time preview
               </span>
             </div>
+            <span className="text-xs text-gray-500 truncate max-w-xs">
+              {currentUrl && new URL(currentUrl).hostname}
+            </span>
           </div>
         </div>
       </div>
 
-      {/* Professional Preview Area with Grid Background - NO BORDERS */}
+      {/* Enhanced Preview Area - NO BORDERS, Clean Design */}
       <div
-        className="flex-1 flex items-center justify-center p-8 relative overflow-hidden"
+        className="flex-1 flex items-center justify-center p-4 sm:p-8 relative overflow-hidden"
         style={{
           backgroundImage: `
-            linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px)
+            linear-gradient(rgba(59, 130, 246, 0.03) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(59, 130, 246, 0.03) 1px, transparent 1px)
           `,
           backgroundSize: "20px 20px",
         }}
       >
         {proxyUrl ? (
           <div className="relative">
-            {/* Clean Preview Container - NO DEVICE FRAMES OR BORDERS */}
+            {/* Clean Preview Container - NO DEVICE FRAMES */}
             <div
-              className="bg-white shadow-2xl overflow-hidden"
+              className="bg-white shadow-2xl overflow-hidden rounded-lg"
               style={{
-                width: previewWidth,
-                height: previewHeight,
+                width: Math.min(previewWidth, window.innerWidth - 50),
+                height: Math.min(previewHeight, window.innerHeight - 200),
               }}
             >
               {isLoading ? (
-                <div className="w-full h-full flex items-center justify-center bg-gray-100">
+                <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-50">
                   <div className="text-center">
                     <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-                    <p className="text-gray-600 font-medium">
-                      Loading website resources...
+                    <p className="text-gray-700 font-medium">
+                      Real-time crawling...
                     </p>
                     <p className="text-gray-500 text-sm mt-2">
-                      Fetching fonts, styles, and images
+                      Loading all resources in real-time
                     </p>
                   </div>
                 </div>
               ) : hasError ? (
                 <div className="w-full h-full flex items-center justify-center bg-red-50">
-                  <div className="text-center p-8">
+                  <div className="text-center p-6 sm:p-8">
                     <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
                     <h3 className="font-semibold text-gray-800 mb-2">
                       Cannot Load Website
@@ -485,30 +566,30 @@ export default function Preview() {
 
             {/* Professional Info Label */}
             <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2">
-              <div className="bg-black/80 backdrop-blur-sm rounded-lg px-4 py-2 text-center">
-                <div className="text-white text-sm font-medium">
+              <div className="bg-white/90 backdrop-blur-sm rounded-lg px-4 py-2 text-center shadow-lg border border-slate-200">
+                <div className="text-gray-800 text-sm font-medium">
                   {selectedDevice.name}
                 </div>
-                <div className="text-gray-300 text-xs">
+                <div className="text-gray-600 text-xs">
                   {currentWidth} × {currentHeight}px • {Math.round(scale * 100)}
-                  %
+                  % • Real-time
                 </div>
               </div>
             </div>
           </div>
         ) : (
           <div className="text-center">
-            <div className="w-20 h-20 bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-6">
+            <div className="w-16 sm:w-20 h-16 sm:h-20 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-full flex items-center justify-center mx-auto mb-6">
               <img
-                src="https://cdn.builder.io/api/v1/image/assets%2F2f9afe8dc22849b186c0fc07b1bbb4f9%2F5fe2031174b94cc7b66976474410e316?format=webp&width=800"
+                src="https://cdn.builder.io/api/v1/image/assets%2F2f9afe8dc22849b186c0fc07b1bbb4f9%2F2f9de9187e1c4134988baa17156cc2c7?format=webp&width=800"
                 alt="RespoCheck"
-                className="w-10 h-10 object-contain"
+                className="w-8 sm:w-10 h-8 sm:h-10 object-contain"
               />
             </div>
-            <h3 className="text-xl font-semibold text-white mb-2">
+            <h3 className="text-lg sm:text-xl font-semibold text-gray-800 mb-2">
               No Preview Available
             </h3>
-            <p className="text-gray-400 mb-6">
+            <p className="text-gray-600 mb-6 text-sm sm:text-base">
               Please return to home to enter a website URL.
             </p>
             <Button onClick={goHome} className="bg-blue-500 hover:bg-blue-600">
