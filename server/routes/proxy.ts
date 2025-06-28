@@ -16,43 +16,86 @@ export const handleProxy: RequestHandler = async (req, res) => {
       return res.status(400).json({ error: "Invalid URL format" });
     }
 
-    // Enhanced real-time crawling headers to mimic real browser behavior
-    const response = await fetch(targetUrl.toString(), {
-      headers: {
-        "User-Agent":
-          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36",
-        Accept:
-          "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
-        "Accept-Language": "en-US,en;q=0.9",
-        "Accept-Encoding": "gzip, deflate, br",
-        "Cache-Control": "no-cache, no-store, must-revalidate",
-        Pragma: "no-cache",
-        "Sec-Fetch-Dest": "document",
-        "Sec-Fetch-Mode": "navigate",
-        "Sec-Fetch-Site": "none",
-        "Sec-Fetch-User": "?1",
-        "Upgrade-Insecure-Requests": "1",
-        DNT: "1",
-        Connection: "keep-alive",
-        "Sec-CH-UA":
-          '"Not A(Brand";v="99", "Google Chrome";v="121", "Chromium";v="121"',
-        "Sec-CH-UA-Mobile": "?0",
-        "Sec-CH-UA-Platform": '"Windows"',
-      },
-      redirect: "follow",
-    });
+    console.log(`🔍 Real-time crawling: ${targetUrl.toString()}`);
+
+    // REAL crawling with multiple attempts for reliability
+    let response: Response;
+    let attempts = 0;
+    const maxAttempts = 3;
+
+    while (attempts < maxAttempts) {
+      try {
+        response = await fetch(targetUrl.toString(), {
+          headers: {
+            // Mimic real browser perfectly
+            "User-Agent":
+              "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
+            Accept:
+              "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
+            "Accept-Language": "en-US,en;q=0.9,es;q=0.8",
+            "Accept-Encoding": "gzip, deflate, br",
+            "Cache-Control": "no-cache",
+            Pragma: "no-cache",
+            "Sec-Fetch-Dest": "document",
+            "Sec-Fetch-Mode": "navigate",
+            "Sec-Fetch-Site": "none",
+            "Sec-Fetch-User": "?1",
+            "Upgrade-Insecure-Requests": "1",
+            DNT: "1",
+            Connection: "keep-alive",
+            "Sec-CH-UA":
+              '"Chromium";v="122", "Not(A:Brand";v="24", "Google Chrome";v="122"',
+            "Sec-CH-UA-Mobile": "?0",
+            "Sec-CH-UA-Platform": '"Windows"',
+            "Sec-CH-UA-Arch": '"x86"',
+            "Sec-CH-UA-Model": '""',
+            "Sec-CH-UA-Platform-Version": '"15.0.0"',
+          },
+          redirect: "follow",
+          signal: AbortSignal.timeout(30000), // 30 second timeout
+        });
+
+        if (response.ok) {
+          break;
+        }
+
+        attempts++;
+        if (attempts < maxAttempts) {
+          console.log(`⚠️ Attempt ${attempts} failed, retrying...`);
+          await new Promise((resolve) => setTimeout(resolve, 1000));
+        }
+      } catch (error) {
+        attempts++;
+        if (attempts >= maxAttempts) {
+          throw error;
+        }
+        console.log(`⚠️ Attempt ${attempts} failed with error, retrying...`);
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+      }
+    }
 
     if (!response.ok) {
+      console.error(`❌ Failed to crawl after ${maxAttempts} attempts`);
       return res.status(response.status).json({
-        error: `Failed to fetch website: ${response.statusText}`,
+        error: `Real-time crawling failed: ${response.statusText}`,
       });
     }
 
+    console.log(
+      `✅ Successfully crawled: ${response.status} ${response.statusText}`,
+    );
+
     let content = await response.text();
 
-    // Advanced real-time content processing for live crawling
+    if (!content || content.length < 100) {
+      throw new Error("Received empty or invalid content");
+    }
+
+    console.log(`📄 Content length: ${content.length} characters`);
+
+    // AGGRESSIVE content processing for real crawling
     content = content
-      // Remove ALL frame-busting headers and restrictions
+      // Remove ALL iframe blocking mechanisms
       .replace(
         /<meta[^>]*http-equiv=['"](X-Frame-Options|x-frame-options)['"'][^>]*>/gi,
         "",
@@ -63,239 +106,264 @@ export const handleProxy: RequestHandler = async (req, res) => {
       )
       .replace(
         /<meta[^>]*name=['"](referrer)['"'][^>]*>/gi,
-        '<meta name="referrer" content="no-referrer-when-downgrade">',
+        '<meta name="referrer" content="unsafe-url">',
       )
 
-      // Enhanced URL fixing for ALL resources (real-time crawling)
+      // Fix ALL resource URLs for real-time loading
       .replace(/src=['"]([^'"]*)['"]/gi, (match, src) => {
-        if (src.startsWith("data:")) return match;
-        if (src.startsWith("//")) {
-          return `src="${targetUrl.protocol}${src}"`;
-        } else if (src.startsWith("/")) {
-          return `src="${targetUrl.origin}${src}"`;
-        } else if (!src.startsWith("http") && !src.startsWith("blob:")) {
-          const baseDir = targetUrl.pathname.endsWith("/")
-            ? targetUrl.pathname
-            : targetUrl.pathname.substring(
-                0,
-                targetUrl.pathname.lastIndexOf("/") + 1,
-              );
-          return `src="${targetUrl.origin}${baseDir}${src}"`;
+        if (
+          src.startsWith("data:") ||
+          src.startsWith("blob:") ||
+          src.startsWith("javascript:")
+        )
+          return match;
+
+        try {
+          if (src.startsWith("//")) {
+            return `src="${targetUrl.protocol}${src}"`;
+          } else if (src.startsWith("/")) {
+            return `src="${targetUrl.origin}${src}"`;
+          } else if (!src.startsWith("http")) {
+            const absoluteUrl = new URL(src, targetUrl.href);
+            return `src="${absoluteUrl.href}"`;
+          }
+        } catch (e) {
+          console.warn(`⚠️ Failed to resolve src: ${src}`);
         }
         return match;
       })
 
       .replace(/href=['"]([^'"]*)['"]/gi, (match, href) => {
-        if (href.startsWith("data:") || href.startsWith("javascript:"))
+        if (
+          href.startsWith("data:") ||
+          href.startsWith("javascript:") ||
+          href.startsWith("#") ||
+          href.startsWith("mailto:") ||
+          href.startsWith("tel:")
+        )
           return match;
-        if (href.startsWith("//")) {
-          return `href="${targetUrl.protocol}${href}"`;
-        } else if (href.startsWith("/")) {
-          return `href="${targetUrl.origin}${href}"`;
-        } else if (
-          !href.startsWith("http") &&
-          !href.startsWith("#") &&
-          !href.startsWith("mailto:") &&
-          !href.startsWith("tel:")
-        ) {
-          const baseDir = targetUrl.pathname.endsWith("/")
-            ? targetUrl.pathname
-            : targetUrl.pathname.substring(
-                0,
-                targetUrl.pathname.lastIndexOf("/") + 1,
-              );
-          return `href="${targetUrl.origin}${baseDir}${href}"`;
+
+        try {
+          if (href.startsWith("//")) {
+            return `href="${targetUrl.protocol}${href}"`;
+          } else if (href.startsWith("/")) {
+            return `href="${targetUrl.origin}${href}"`;
+          } else if (!href.startsWith("http")) {
+            const absoluteUrl = new URL(href, targetUrl.href);
+            return `href="${absoluteUrl.href}"`;
+          }
+        } catch (e) {
+          console.warn(`⚠️ Failed to resolve href: ${href}`);
         }
         return match;
       })
 
-      // Fix CSS background images and @import statements for real-time loading
+      // Fix CSS URLs
       .replace(/url\(['"]?([^'"]*?)['"]?\)/gi, (match, url) => {
         if (url.startsWith("data:") || url.startsWith("blob:")) return match;
-        if (url.startsWith("//")) {
-          return `url('${targetUrl.protocol}${url}')`;
-        } else if (url.startsWith("/")) {
-          return `url('${targetUrl.origin}${url}')`;
-        } else if (!url.startsWith("http")) {
-          const baseDir = targetUrl.pathname.endsWith("/")
-            ? targetUrl.pathname
-            : targetUrl.pathname.substring(
-                0,
-                targetUrl.pathname.lastIndexOf("/") + 1,
-              );
-          return `url('${targetUrl.origin}${baseDir}${url}')`;
+
+        try {
+          if (url.startsWith("//")) {
+            return `url("${targetUrl.protocol}${url}")`;
+          } else if (url.startsWith("/")) {
+            return `url("${targetUrl.origin}${url}")`;
+          } else if (!url.startsWith("http")) {
+            const absoluteUrl = new URL(url, targetUrl.href);
+            return `url("${absoluteUrl.href}")`;
+          }
+        } catch (e) {
+          console.warn(`⚠️ Failed to resolve CSS url: ${url}`);
         }
         return match;
       })
 
-      // Fix @import statements in CSS
-      .replace(/@import\s+['"]([^'"]*)['"]/gi, (match, importUrl) => {
-        if (importUrl.startsWith("//")) {
-          return `@import '${targetUrl.protocol}${importUrl}'`;
-        } else if (importUrl.startsWith("/")) {
-          return `@import '${targetUrl.origin}${importUrl}'`;
-        } else if (!importUrl.startsWith("http")) {
-          const baseDir = targetUrl.pathname.endsWith("/")
-            ? targetUrl.pathname
-            : targetUrl.pathname.substring(
-                0,
-                targetUrl.pathname.lastIndexOf("/") + 1,
-              );
-          return `@import '${targetUrl.origin}${baseDir}${importUrl}'`;
-        }
-        return match;
-      })
-
-      // Add base href for comprehensive resource loading
+      // Add comprehensive base tag
       .replace(/<head>/i, `<head><base href="${targetUrl.origin}/">`)
 
-      // Inject comprehensive real-time crawling and compatibility script
+      // Inject REAL-TIME compatibility script
       .replace(
         /<\/head>/i,
         `
         <style>
-          /* Ensure proper rendering in iframe */
-          * { box-sizing: border-box; }
-          body { margin: 0; padding: 0; overflow-x: auto; }
-          html { width: 100%; height: 100%; }
+          /* Force proper rendering */
+          * { box-sizing: border-box !important; }
+          html, body { 
+            width: 100% !important; 
+            height: 100% !important; 
+            margin: 0 !important; 
+            padding: 0 !important; 
+            overflow-x: auto !important;
+          }
+          /* Hide loading indicators that might interfere */
+          .loading, .loader, .spinner, .preloader { display: none !important; }
         </style>
         <script>
           (function() {
-            // Real-time compatibility and frame-busting removal
+            console.log('🚀 RespoCheck Real-time Crawling Active');
+            
+            // Override ALL frame-busting attempts
             try {
-              // Override frame-busting attempts
               if (window.top !== window.self) {
-                Object.defineProperty(window, 'top', { value: window.self, writable: false });
-                Object.defineProperty(window, 'parent', { value: window.self, writable: false });
-                Object.defineProperty(window, 'frameElement', { value: null, writable: false });
+                // Block frame-busting
+                Object.defineProperty(window, 'top', { 
+                  value: window.self, 
+                  writable: false, 
+                  configurable: false 
+                });
+                Object.defineProperty(window, 'parent', { 
+                  value: window.self, 
+                  writable: false, 
+                  configurable: false 
+                });
+                Object.defineProperty(window, 'frameElement', { 
+                  value: null, 
+                  writable: false, 
+                  configurable: false 
+                });
                 
-                // Remove frame-busting scripts in real-time
+                // Monitor and remove frame-busting scripts
                 const observer = new MutationObserver(function(mutations) {
                   mutations.forEach(function(mutation) {
                     mutation.addedNodes.forEach(function(node) {
-                      if (node.nodeType === 1 && node.tagName === 'SCRIPT') {
-                        const content = node.innerHTML || node.textContent || '';
-                        if (content.includes('top.location') || 
-                            content.includes('parent.location') ||
-                            content.includes('frameElement') ||
-                            content.includes('window.top') ||
-                            content.includes('top!=self') ||
-                            content.includes('top!=window')) {
-                          node.remove();
+                      if (node.nodeType === 1) {
+                        if (node.tagName === 'SCRIPT') {
+                          const content = node.textContent || node.innerHTML || '';
+                          if (content.match(/(top\s*[!=]=|parent\s*[!=]=|frameElement|location\s*=|window\.open)/)) {
+                            console.log('🚫 Blocked frame-busting script');
+                            node.remove();
+                          }
                         }
+                        // Also check child scripts
+                        const scripts = node.querySelectorAll ? node.querySelectorAll('script') : [];
+                        scripts.forEach(script => {
+                          const content = script.textContent || script.innerHTML || '';
+                          if (content.match(/(top\s*[!=]=|parent\s*[!=]=|frameElement|location\s*=)/)) {
+                            console.log('🚫 Blocked nested frame-busting script');
+                            script.remove();
+                          }
+                        });
                       }
                     });
                   });
                 });
                 
-                observer.observe(document, { childList: true, subtree: true });
+                observer.observe(document, { 
+                  childList: true, 
+                  subtree: true,
+                  attributes: false,
+                  characterData: false
+                });
                 
-                // Override location changing
-                const originalReplace = window.location.replace;
-                const originalAssign = window.location.assign;
-                window.location.replace = function() { return false; };
-                window.location.assign = function() { return false; };
+                // Override dangerous functions
+                const noop = function() { return false; };
+                window.location.replace = noop;
+                window.location.assign = noop;
+                if (window.location.reload) window.location.reload = noop;
               }
               
-              // Real-time resource loading optimization
+              // Force load lazy content
               document.addEventListener('DOMContentLoaded', function() {
-                // Force load all images
-                const images = document.querySelectorAll('img[data-src], img[data-lazy-src]');
-                images.forEach(function(img) {
-                  if (img.dataset.src) {
-                    img.src = img.dataset.src;
-                  }
-                  if (img.dataset.lazySrc) {
-                    img.src = img.dataset.lazySrc;
-                  }
+                console.log('📋 DOM Content Loaded - Forcing resource loading');
+                
+                // Load lazy images
+                const lazyImages = document.querySelectorAll('img[data-src], img[data-lazy-src], img[loading="lazy"]');
+                lazyImages.forEach(function(img) {
+                  if (img.dataset.src) img.src = img.dataset.src;
+                  if (img.dataset.lazySrc) img.src = img.dataset.lazySrc;
+                  img.loading = 'eager';
                 });
                 
-                // Force load all lazy CSS
-                const lazyStyles = document.querySelectorAll('link[data-href]');
-                lazyStyles.forEach(function(link) {
-                  link.href = link.dataset.href;
+                // Load lazy iframes
+                const lazyIframes = document.querySelectorAll('iframe[data-src], iframe[loading="lazy"]');
+                lazyIframes.forEach(function(iframe) {
+                  if (iframe.dataset.src) iframe.src = iframe.dataset.src;
+                  iframe.loading = 'eager';
                 });
                 
-                // Trigger any lazy loading scripts
-                window.dispatchEvent(new Event('scroll'));
-                window.dispatchEvent(new Event('resize'));
+                // Force trigger scroll events for lazy loading
+                setTimeout(() => {
+                  window.dispatchEvent(new Event('scroll'));
+                  window.dispatchEvent(new Event('resize'));
+                  window.dispatchEvent(new Event('load'));
+                }, 500);
               });
               
             } catch (e) {
-              // Ignore errors but continue
+              console.warn('⚠️ Frame compatibility script error:', e);
             }
           })();
         </script>
         </head>`,
       )
 
-      // Final script for complete real-time rendering
+      // Final cleanup script
       .replace(
         /<\/body>/i,
         `
         <script>
-          // Final real-time optimizations
           try {
-            // Prevent any remaining navigation attempts
-            window.addEventListener('beforeunload', function(e) {
-              e.preventDefault();
-              e.stopPropagation();
-              return null;
+            // Final anti-frame-busting measures
+            ['beforeunload', 'unload', 'pagehide'].forEach(event => {
+              window.addEventListener(event, function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                e.stopImmediatePropagation();
+                return null;
+              }, true);
             });
             
-            // Override console errors that might break rendering
+            // Suppress frame-related console errors
             const originalError = console.error;
-            console.error = function() {
-              // Suppress frame-related errors
-              const args = Array.from(arguments);
-              if (!args.some(arg => typeof arg === 'string' && 
-                  (arg.includes('frame') || arg.includes('X-Frame') || arg.includes('SecurityError')))) {
-                originalError.apply(console, arguments);
+            console.error = function(...args) {
+              const message = args.join(' ');
+              if (!message.match(/(frame|X-Frame|SecurityError|cross-origin)/i)) {
+                originalError.apply(console, args);
               }
             };
             
-            // Force final rendering pass
-            setTimeout(function() {
-              // Trigger any remaining load events
-              window.dispatchEvent(new Event('load'));
-              document.dispatchEvent(new Event('DOMContentLoaded'));
-            }, 100);
+            // Mark as successfully loaded
+            setTimeout(() => {
+              console.log('✅ RespoCheck: Real-time crawling complete');
+              window.dispatchEvent(new CustomEvent('respocheck-loaded'));
+            }, 1000);
             
-          } catch (e) {}
+          } catch (e) {
+            console.warn('⚠️ Final script error:', e);
+          }
         </script>
         </body>`,
       );
 
-    // Set enhanced headers for real-time iframe compatibility
+    console.log(`🔧 Content processed and enhanced for iframe compatibility`);
+
+    // Set optimal headers for iframe embedding
     res.setHeader("Content-Type", "text/html; charset=utf-8");
-    res.setHeader("X-Frame-Options", "ALLOWALL");
-    res.setHeader(
-      "Content-Security-Policy",
-      "frame-ancestors *; default-src *; script-src * 'unsafe-inline' 'unsafe-eval'; style-src * 'unsafe-inline'",
-    );
     res.setHeader("Access-Control-Allow-Origin", "*");
-    res.setHeader(
-      "Access-Control-Allow-Methods",
-      "GET, POST, PUT, DELETE, OPTIONS",
-    );
+    res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
     res.setHeader("Access-Control-Allow-Headers", "*");
-    res.setHeader("Referrer-Policy", "no-referrer-when-downgrade");
+    res.setHeader("Referrer-Policy", "unsafe-url");
+    res.setHeader("X-Content-Type-Options", "nosniff");
 
-    // Remove any restrictive headers
+    // Remove restrictive headers
     res.removeHeader("X-Frame-Options");
+    res.removeHeader("Content-Security-Policy");
 
-    // Cache for better performance
+    // Cache for performance
     res.setHeader(
       "Cache-Control",
       "public, max-age=300, stale-while-revalidate=60",
     );
+    res.setHeader("Vary", "Accept-Encoding");
+
+    console.log(`📤 Sending ${content.length} characters to client`);
 
     res.send(content);
   } catch (error) {
-    console.error("Real-time crawling error:", error);
+    console.error("💥 Real-time crawling error:", error);
     res.status(500).json({
-      error: "Failed to crawl website in real-time",
+      error: "Real-time crawling failed",
       details: error instanceof Error ? error.message : "Unknown error",
+      timestamp: new Date().toISOString(),
     });
   }
 };
