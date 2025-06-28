@@ -21,6 +21,8 @@ import {
   RotateCcw,
   Settings,
   Maximize2,
+  Laptop,
+  Tv,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -29,32 +31,141 @@ interface Device {
   name: string;
   width: number;
   height: number;
+  icon: React.ReactNode;
 }
 
 const devices = {
   desktop: [
-    { id: "4k", name: "4K Ultra HD", width: 3840, height: 2160 },
-    { id: "2k", name: "2K QHD", width: 2560, height: 1440 },
-    { id: "fullhd", name: "Full HD", width: 1920, height: 1080 },
-    { id: "laptop", name: "MacBook Pro", width: 1440, height: 900 },
-    { id: "standard", name: "Standard HD", width: 1366, height: 768 },
-    { id: "old", name: "Old Monitor", width: 1024, height: 768 },
+    {
+      id: "4k",
+      name: "4K Ultra HD",
+      width: 3840,
+      height: 2160,
+      icon: <Tv className="w-4 h-4" />,
+    },
+    {
+      id: "2k",
+      name: "2K QHD",
+      width: 2560,
+      height: 1440,
+      icon: <Monitor className="w-4 h-4" />,
+    },
+    {
+      id: "fullhd",
+      name: "Full HD",
+      width: 1920,
+      height: 1080,
+      icon: <Monitor className="w-4 h-4" />,
+    },
+    {
+      id: "laptop",
+      name: "MacBook Pro",
+      width: 1440,
+      height: 900,
+      icon: <Laptop className="w-4 h-4" />,
+    },
+    {
+      id: "standard",
+      name: "Standard HD",
+      width: 1366,
+      height: 768,
+      icon: <Laptop className="w-4 h-4" />,
+    },
+    {
+      id: "old",
+      name: "Old Monitor",
+      width: 1024,
+      height: 768,
+      icon: <Monitor className="w-4 h-4" />,
+    },
   ],
   tablet: [
-    { id: "ipad-pro", name: "iPad Pro 12.9", width: 1024, height: 1366 },
-    { id: "ipad-air", name: "iPad Air", width: 820, height: 1180 },
-    { id: "ipad", name: "iPad", width: 768, height: 1024 },
-    { id: "surface", name: "Surface Pro", width: 912, height: 1368 },
-    { id: "galaxy-tab", name: "Galaxy Tab", width: 800, height: 1280 },
-    { id: "kindle", name: "Kindle Fire", width: 1024, height: 600 },
+    {
+      id: "ipad-pro",
+      name: "iPad Pro 12.9",
+      width: 1024,
+      height: 1366,
+      icon: <Tablet className="w-4 h-4" />,
+    },
+    {
+      id: "ipad-air",
+      name: "iPad Air",
+      width: 820,
+      height: 1180,
+      icon: <Tablet className="w-4 h-4" />,
+    },
+    {
+      id: "ipad",
+      name: "iPad",
+      width: 768,
+      height: 1024,
+      icon: <Tablet className="w-4 h-4" />,
+    },
+    {
+      id: "surface",
+      name: "Surface Pro",
+      width: 912,
+      height: 1368,
+      icon: <Tablet className="w-4 h-4" />,
+    },
+    {
+      id: "galaxy-tab",
+      name: "Galaxy Tab",
+      width: 800,
+      height: 1280,
+      icon: <Tablet className="w-4 h-4" />,
+    },
+    {
+      id: "kindle",
+      name: "Kindle Fire",
+      width: 1024,
+      height: 600,
+      icon: <Tablet className="w-4 h-4" />,
+    },
   ],
   mobile: [
-    { id: "iphone-15-max", name: "iPhone 15 Pro Max", width: 430, height: 932 },
-    { id: "iphone-15", name: "iPhone 15", width: 393, height: 852 },
-    { id: "iphone-14", name: "iPhone 14", width: 390, height: 844 },
-    { id: "galaxy-s24", name: "Galaxy S24 Ultra", width: 412, height: 915 },
-    { id: "pixel-8", name: "Pixel 8 Pro", width: 412, height: 892 },
-    { id: "iphone-se", name: "iPhone SE", width: 375, height: 667 },
+    {
+      id: "iphone-15-max",
+      name: "iPhone 15 Pro Max",
+      width: 430,
+      height: 932,
+      icon: <Smartphone className="w-4 h-4" />,
+    },
+    {
+      id: "iphone-15",
+      name: "iPhone 15",
+      width: 393,
+      height: 852,
+      icon: <Smartphone className="w-4 h-4" />,
+    },
+    {
+      id: "iphone-14",
+      name: "iPhone 14",
+      width: 390,
+      height: 844,
+      icon: <Smartphone className="w-4 h-4" />,
+    },
+    {
+      id: "galaxy-s24",
+      name: "Galaxy S24 Ultra",
+      width: 412,
+      height: 915,
+      icon: <Smartphone className="w-4 h-4" />,
+    },
+    {
+      id: "pixel-8",
+      name: "Pixel 8 Pro",
+      width: 412,
+      height: 892,
+      icon: <Smartphone className="w-4 h-4" />,
+    },
+    {
+      id: "iphone-se",
+      name: "iPhone SE",
+      width: 375,
+      height: 667,
+      icon: <Smartphone className="w-4 h-4" />,
+    },
   ],
 };
 
@@ -82,8 +193,11 @@ export default function Index() {
   const zoomOptions = [
     { value: "auto", label: "Auto Fit" },
     { value: "25", label: "25%" },
+    { value: "33", label: "33%" },
     { value: "50", label: "50%" },
+    { value: "67", label: "67%" },
     { value: "75", label: "75%" },
+    { value: "90", label: "90%" },
     { value: "100", label: "100%" },
     { value: "125", label: "125%" },
     { value: "150", label: "150%" },
@@ -198,13 +312,12 @@ export default function Index() {
     let scale: number;
 
     if (zoomLevel === "auto") {
-      // Much larger auto-fit calculation
       const containerWidth = Math.min(window.innerWidth - 80, 1600);
       const containerHeight = Math.min(window.innerHeight - 350, 1000);
       scale = Math.min(
         containerWidth / currentWidth,
         containerHeight / currentHeight,
-        1.5, // Allow up to 150% for auto
+        1.5,
       );
     } else {
       scale = parseInt(zoomLevel) / 100;
@@ -224,20 +337,23 @@ export default function Index() {
   } = getPreviewDimensions();
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-6 py-4">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-blue-500 rounded-lg">
-              <Globe className="w-6 h-6 text-white" />
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-slate-900 to-black">
+      {/* Professional Header */}
+      <div className="bg-black/50 border-b border-gray-700/50 backdrop-blur-xl">
+        <div className="max-w-7xl mx-auto px-6 py-6">
+          <div className="flex items-center gap-4">
+            <div className="relative">
+              <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl blur opacity-75"></div>
+              <div className="relative p-3 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl">
+                <Globe className="w-6 h-6 text-white" />
+              </div>
             </div>
             <div>
-              <h1 className="text-xl font-bold text-gray-900">
+              <h1 className="text-2xl font-bold text-white">
                 ResponsiveViewer
               </h1>
-              <p className="text-sm text-gray-600">
-                Test your website on different screen sizes
+              <p className="text-gray-400">
+                Professional responsive design testing tool
               </p>
             </div>
           </div>
@@ -247,7 +363,7 @@ export default function Index() {
       {/* Main Content */}
       <div className="max-w-7xl mx-auto p-6">
         {/* URL Input */}
-        <div className="bg-white rounded-lg shadow-sm border p-6 mb-6">
+        <div className="bg-black/40 backdrop-blur-xl border border-gray-700/50 rounded-xl p-6 mb-6">
           <div className="flex gap-4">
             <Input
               type="url"
@@ -255,12 +371,12 @@ export default function Index() {
               value={url}
               onChange={(e) => setUrl(e.target.value)}
               onKeyPress={handleKeyPress}
-              className="flex-1 h-12 text-base"
+              className="flex-1 h-12 text-base bg-gray-800/50 border-gray-600 text-white placeholder:text-gray-400 focus:border-blue-500"
             />
             <Button
               onClick={handlePreview}
               disabled={!url.trim() || isLoading}
-              className="h-12 px-8 bg-blue-500 hover:bg-blue-600 text-base font-medium"
+              className="h-12 px-8 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white text-base font-medium"
             >
               {isLoading ? "Loading..." : "Test Website"}
             </Button>
@@ -268,17 +384,17 @@ export default function Index() {
         </div>
 
         {/* Device Categories */}
-        <div className="bg-white rounded-lg shadow-sm border mb-6">
+        <div className="bg-black/40 backdrop-blur-xl border border-gray-700/50 rounded-xl mb-6">
           {/* Category Tabs */}
-          <div className="border-b border-gray-200">
+          <div className="border-b border-gray-700/50">
             <div className="flex">
               <button
                 onClick={() => handleCategoryChange("desktop")}
                 className={cn(
                   "flex items-center gap-3 px-8 py-4 border-b-2 font-medium text-base transition-colors",
                   activeCategory === "desktop"
-                    ? "border-blue-500 text-blue-600 bg-blue-50"
-                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300",
+                    ? "border-blue-500 text-blue-400 bg-blue-500/10"
+                    : "border-transparent text-gray-400 hover:text-white hover:border-gray-600",
                 )}
               >
                 <Monitor className="w-5 h-5" />
@@ -289,8 +405,8 @@ export default function Index() {
                 className={cn(
                   "flex items-center gap-3 px-8 py-4 border-b-2 font-medium text-base transition-colors",
                   activeCategory === "tablet"
-                    ? "border-blue-500 text-blue-600 bg-blue-50"
-                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300",
+                    ? "border-blue-500 text-blue-400 bg-blue-500/10"
+                    : "border-transparent text-gray-400 hover:text-white hover:border-gray-600",
                 )}
               >
                 <Tablet className="w-5 h-5" />
@@ -301,8 +417,8 @@ export default function Index() {
                 className={cn(
                   "flex items-center gap-3 px-8 py-4 border-b-2 font-medium text-base transition-colors",
                   activeCategory === "mobile"
-                    ? "border-blue-500 text-blue-600 bg-blue-50"
-                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300",
+                    ? "border-blue-500 text-blue-400 bg-blue-500/10"
+                    : "border-transparent text-gray-400 hover:text-white hover:border-gray-600",
                 )}
               >
                 <Smartphone className="w-5 h-5" />
@@ -319,31 +435,34 @@ export default function Index() {
                   key={device.id}
                   onClick={() => handleDeviceSelect(device)}
                   className={cn(
-                    "p-4 text-left border rounded-lg transition-all hover:border-blue-300 hover:bg-blue-50",
+                    "p-4 text-left border rounded-lg transition-all hover:border-blue-500/50 hover:bg-blue-500/10",
                     selectedDevice.id === device.id && !useCustomSize
-                      ? "border-blue-500 bg-blue-50 text-blue-700"
-                      : "border-gray-200 text-gray-700",
+                      ? "border-blue-500 bg-blue-500/20 text-blue-300"
+                      : "border-gray-600 text-gray-300",
                   )}
                 >
-                  <div className="font-medium text-sm mb-1">{device.name}</div>
+                  <div className="flex items-center gap-2 mb-2">
+                    {device.icon}
+                    <div className="font-medium text-sm">{device.name}</div>
+                  </div>
                   <div className="text-xs text-gray-500">
-                    {device.width} × {device.height}
+                    {device.width} × {device.height}px
                   </div>
                 </button>
               ))}
             </div>
 
             {/* Custom Size Controls */}
-            <div className="border-t pt-6">
+            <div className="border-t border-gray-700/50 pt-6">
               <div className="flex items-center gap-3 mb-4">
-                <Settings className="w-5 h-5 text-gray-600" />
-                <span className="font-medium text-gray-700">
+                <Settings className="w-5 h-5 text-gray-400" />
+                <span className="font-medium text-white">
                   Custom Size Controls
                 </span>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-3">
+                  <label className="block text-sm font-medium text-gray-300 mb-3">
                     Width: {customWidth}px
                   </label>
                   <Slider
@@ -363,7 +482,7 @@ export default function Index() {
                   </div>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-3">
+                  <label className="block text-sm font-medium text-gray-300 mb-3">
                     Height: {customHeight}px
                   </label>
                   <Slider
@@ -389,17 +508,17 @@ export default function Index() {
 
         {/* Preview Controls */}
         {proxyUrl && (
-          <div className="bg-white rounded-lg shadow-sm border p-4 mb-6">
+          <div className="bg-black/40 backdrop-blur-xl border border-gray-700/50 rounded-xl p-4 mb-6">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
                 <Badge
                   variant="outline"
-                  className="text-base px-4 py-2 font-mono"
+                  className="text-base px-4 py-2 font-mono border-gray-600 text-gray-300"
                 >
                   {currentWidth} × {currentHeight}px
                 </Badge>
                 {useCustomSize && (
-                  <Badge className="bg-green-100 text-green-800 border-green-300">
+                  <Badge className="bg-green-500/20 text-green-400 border-green-500/30">
                     Custom Size
                   </Badge>
                 )}
@@ -407,14 +526,18 @@ export default function Index() {
               <div className="flex items-center gap-3">
                 {/* Zoom Control */}
                 <div className="flex items-center gap-2">
-                  <span className="text-sm text-gray-600">Zoom:</span>
+                  <span className="text-sm text-gray-400">Zoom:</span>
                   <Select value={zoomLevel} onValueChange={setZoomLevel}>
-                    <SelectTrigger className="w-32">
+                    <SelectTrigger className="w-32 bg-gray-800 border-gray-600 text-white">
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="bg-gray-800 border-gray-600">
                       {zoomOptions.map((option) => (
-                        <SelectItem key={option.value} value={option.value}>
+                        <SelectItem
+                          key={option.value}
+                          value={option.value}
+                          className="text-white hover:bg-gray-700"
+                        >
                           {option.label}
                         </SelectItem>
                       ))}
@@ -428,7 +551,7 @@ export default function Index() {
                     onClick={toggleRotation}
                     variant="outline"
                     size="sm"
-                    className="gap-2"
+                    className="gap-2 border-gray-600 text-gray-300 hover:bg-gray-700"
                   >
                     <RotateCcw className="w-4 h-4" />
                     {isRotated ? "Portrait" : "Landscape"}
@@ -439,7 +562,7 @@ export default function Index() {
                   onClick={openPreviewMode}
                   variant="outline"
                   size="sm"
-                  className="gap-2"
+                  className="gap-2 border-blue-500 text-blue-400 hover:bg-blue-500/20"
                 >
                   <Maximize2 className="w-4 h-4" />
                   Preview Mode
@@ -449,7 +572,7 @@ export default function Index() {
                   onClick={openInNewTab}
                   variant="outline"
                   size="sm"
-                  className="gap-2"
+                  className="gap-2 border-gray-600 text-gray-300 hover:bg-gray-700"
                 >
                   <ExternalLink className="w-4 h-4" />
                   Open Original
@@ -459,12 +582,21 @@ export default function Index() {
           </div>
         )}
 
-        {/* Much Bigger Preview */}
+        {/* Professional Preview with Grid Background */}
         {proxyUrl && (
-          <div className="bg-white rounded-lg shadow-sm border p-6">
+          <div
+            className="bg-black/40 backdrop-blur-xl border border-gray-700/50 rounded-xl p-8"
+            style={{
+              backgroundImage: `
+                linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px)
+              `,
+              backgroundSize: "20px 20px",
+            }}
+          >
             <div className="flex justify-center">
               <div
-                className="bg-white shadow-xl overflow-hidden border border-gray-200"
+                className="bg-white shadow-2xl overflow-hidden border border-gray-300 rounded-lg"
                 style={{
                   width: previewWidth,
                   height: previewHeight,
@@ -523,23 +655,36 @@ export default function Index() {
               </div>
             </div>
             {/* Preview Info */}
-            <div className="text-center mt-4 text-sm text-gray-500">
-              Showing at {Math.round(scale * 100)}% • {currentWidth} ×{" "}
-              {currentHeight}px
+            <div className="text-center mt-6">
+              <div className="inline-flex items-center gap-3 bg-black/60 backdrop-blur-sm rounded-lg px-4 py-2">
+                <span className="text-white font-medium">
+                  {selectedDevice.name}
+                </span>
+                <Badge
+                  variant="outline"
+                  className="border-gray-600 text-gray-300"
+                >
+                  {Math.round(scale * 100)}% zoom
+                </Badge>
+                <span className="text-gray-400">•</span>
+                <span className="text-gray-400">
+                  {currentWidth} × {currentHeight}px
+                </span>
+              </div>
             </div>
           </div>
         )}
 
         {/* Empty State */}
         {!proxyUrl && (
-          <div className="bg-white rounded-lg shadow-sm border p-12 text-center">
-            <div className="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-6">
-              <Globe className="w-10 h-10 text-blue-500" />
+          <div className="bg-black/40 backdrop-blur-xl border border-gray-700/50 rounded-xl p-12 text-center">
+            <div className="w-20 h-20 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-6">
+              <Globe className="w-10 h-10 text-white" />
             </div>
-            <h2 className="text-2xl font-semibold text-gray-900 mb-3">
-              Test Your Website's Responsiveness
+            <h2 className="text-2xl font-semibold text-white mb-3">
+              Professional Responsive Testing
             </h2>
-            <p className="text-gray-600 max-w-2xl mx-auto mb-6">
+            <p className="text-gray-400 max-w-2xl mx-auto mb-6">
               Enter a website URL above to see how it looks on different devices
               and screen sizes. Use the zoom controls and custom dimensions for
               precise testing.
