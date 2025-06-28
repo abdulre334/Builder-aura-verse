@@ -18,41 +18,36 @@ export const handleProxy: RequestHandler = async (req, res) => {
 
     console.log(`🔍 Real-time crawling: ${targetUrl.toString()}`);
 
-    // REAL crawling with multiple attempts for reliability
+    // ENHANCED FAST crawling with optimized attempts
     let response: Response;
     let attempts = 0;
-    const maxAttempts = 3;
+    const maxAttempts = 2; // Reduced for speed
 
     while (attempts < maxAttempts) {
       try {
         response = await fetch(targetUrl.toString(), {
           headers: {
-            // Mimic real browser perfectly
+            // Optimized browser headers for speed
             "User-Agent":
               "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
             Accept:
-              "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
-            "Accept-Language": "en-US,en;q=0.9,es;q=0.8",
+              "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
+            "Accept-Language": "en-US,en;q=0.9",
             "Accept-Encoding": "gzip, deflate, br",
-            "Cache-Control": "no-cache",
-            Pragma: "no-cache",
+            "Cache-Control": "max-age=0",
             "Sec-Fetch-Dest": "document",
             "Sec-Fetch-Mode": "navigate",
             "Sec-Fetch-Site": "none",
             "Sec-Fetch-User": "?1",
             "Upgrade-Insecure-Requests": "1",
-            DNT: "1",
             Connection: "keep-alive",
             "Sec-CH-UA":
               '"Chromium";v="122", "Not(A:Brand";v="24", "Google Chrome";v="122"',
             "Sec-CH-UA-Mobile": "?0",
             "Sec-CH-UA-Platform": '"Windows"',
-            "Sec-CH-UA-Arch": '"x86"',
-            "Sec-CH-UA-Model": '""',
-            "Sec-CH-UA-Platform-Version": '"15.0.0"',
           },
           redirect: "follow",
-          signal: AbortSignal.timeout(30000), // 30 second timeout
+          signal: AbortSignal.timeout(15000), // Reduced timeout for speed
         });
 
         if (response.ok) {
@@ -61,16 +56,16 @@ export const handleProxy: RequestHandler = async (req, res) => {
 
         attempts++;
         if (attempts < maxAttempts) {
-          console.log(`⚠️ Attempt ${attempts} failed, retrying...`);
-          await new Promise((resolve) => setTimeout(resolve, 1000));
+          console.log(`⚠️ Fast retry ${attempts}...`);
+          await new Promise((resolve) => setTimeout(resolve, 500)); // Faster retry
         }
       } catch (error) {
         attempts++;
         if (attempts >= maxAttempts) {
           throw error;
         }
-        console.log(`⚠️ Attempt ${attempts} failed with error, retrying...`);
-        await new Promise((resolve) => setTimeout(resolve, 1000));
+        console.log(`⚠️ Fast retry ${attempts} after error...`);
+        await new Promise((resolve) => setTimeout(resolve, 500)); // Faster retry
       }
     }
 
@@ -187,11 +182,11 @@ export const handleProxy: RequestHandler = async (req, res) => {
         <style>
           /* Force proper rendering */
           * { box-sizing: border-box !important; }
-          html, body { 
-            width: 100% !important; 
-            height: 100% !important; 
-            margin: 0 !important; 
-            padding: 0 !important; 
+          html, body {
+            width: 100% !important;
+            height: 100% !important;
+            margin: 0 !important;
+            padding: 0 !important;
             overflow-x: auto !important;
           }
           /* Hide loading indicators that might interfere */
@@ -200,27 +195,27 @@ export const handleProxy: RequestHandler = async (req, res) => {
         <script>
           (function() {
             console.log('🚀 RespoCheck Real-time Crawling Active');
-            
+
             // Override ALL frame-busting attempts
             try {
               if (window.top !== window.self) {
                 // Block frame-busting
-                Object.defineProperty(window, 'top', { 
-                  value: window.self, 
-                  writable: false, 
-                  configurable: false 
+                Object.defineProperty(window, 'top', {
+                  value: window.self,
+                  writable: false,
+                  configurable: false
                 });
-                Object.defineProperty(window, 'parent', { 
-                  value: window.self, 
-                  writable: false, 
-                  configurable: false 
+                Object.defineProperty(window, 'parent', {
+                  value: window.self,
+                  writable: false,
+                  configurable: false
                 });
-                Object.defineProperty(window, 'frameElement', { 
-                  value: null, 
-                  writable: false, 
-                  configurable: false 
+                Object.defineProperty(window, 'frameElement', {
+                  value: null,
+                  writable: false,
+                  configurable: false
                 });
-                
+
                 // Monitor and remove frame-busting scripts
                 const observer = new MutationObserver(function(mutations) {
                   mutations.forEach(function(mutation) {
@@ -246,25 +241,25 @@ export const handleProxy: RequestHandler = async (req, res) => {
                     });
                   });
                 });
-                
-                observer.observe(document, { 
-                  childList: true, 
+
+                observer.observe(document, {
+                  childList: true,
                   subtree: true,
                   attributes: false,
                   characterData: false
                 });
-                
+
                 // Override dangerous functions
                 const noop = function() { return false; };
                 window.location.replace = noop;
                 window.location.assign = noop;
                 if (window.location.reload) window.location.reload = noop;
               }
-              
+
               // Force load lazy content
               document.addEventListener('DOMContentLoaded', function() {
                 console.log('📋 DOM Content Loaded - Forcing resource loading');
-                
+
                 // Load lazy images
                 const lazyImages = document.querySelectorAll('img[data-src], img[data-lazy-src], img[loading="lazy"]');
                 lazyImages.forEach(function(img) {
@@ -272,14 +267,14 @@ export const handleProxy: RequestHandler = async (req, res) => {
                   if (img.dataset.lazySrc) img.src = img.dataset.lazySrc;
                   img.loading = 'eager';
                 });
-                
+
                 // Load lazy iframes
                 const lazyIframes = document.querySelectorAll('iframe[data-src], iframe[loading="lazy"]');
                 lazyIframes.forEach(function(iframe) {
                   if (iframe.dataset.src) iframe.src = iframe.dataset.src;
                   iframe.loading = 'eager';
                 });
-                
+
                 // Force trigger scroll events for lazy loading
                 setTimeout(() => {
                   window.dispatchEvent(new Event('scroll'));
@@ -287,7 +282,7 @@ export const handleProxy: RequestHandler = async (req, res) => {
                   window.dispatchEvent(new Event('load'));
                 }, 500);
               });
-              
+
             } catch (e) {
               console.warn('⚠️ Frame compatibility script error:', e);
             }
@@ -311,7 +306,7 @@ export const handleProxy: RequestHandler = async (req, res) => {
                 return null;
               }, true);
             });
-            
+
             // Suppress frame-related console errors
             const originalError = console.error;
             console.error = function(...args) {
@@ -320,13 +315,13 @@ export const handleProxy: RequestHandler = async (req, res) => {
                 originalError.apply(console, args);
               }
             };
-            
+
             // Mark as successfully loaded
             setTimeout(() => {
               console.log('✅ RespoCheck: Real-time crawling complete');
               window.dispatchEvent(new CustomEvent('respocheck-loaded'));
             }, 1000);
-            
+
           } catch (e) {
             console.warn('⚠️ Final script error:', e);
           }
