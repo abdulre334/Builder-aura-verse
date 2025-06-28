@@ -519,10 +519,15 @@ export default function Preview() {
                       height: currentHeight,
                       transform: `scale(${scale})`,
                       transformOrigin: "top left",
+                      imageRendering: "auto",
+                      textRendering: "optimizeLegibility",
                     }}
                     title="Website Preview"
+                    loading="eager"
+                    importance="high"
                     onError={handleIframeError}
                     onLoad={handleIframeLoad}
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                   />
                 )}
               </div>
