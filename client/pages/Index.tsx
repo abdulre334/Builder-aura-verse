@@ -182,6 +182,17 @@ export default function Index() {
     setCustomWidth(device.width);
     setCustomHeight(device.height);
     setUseCustomSize(false);
+
+    // Auto-reload when switching devices
+    if (proxyUrl) {
+      setIsLoading(true);
+      setHasError(false);
+      setTimeout(() => {
+        if (iframeRef.current) {
+          iframeRef.current.src = iframeRef.current.src;
+        }
+      }, 100);
+    }
   };
 
   const toggleRotation = () => {
