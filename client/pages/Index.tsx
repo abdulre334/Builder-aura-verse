@@ -18,6 +18,9 @@ import {
   AlertCircle,
   RotateCcw,
   Settings,
+  Globe,
+  Maximize2,
+  Minimize2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -63,7 +66,7 @@ export default function Index() {
   const [activeCategory, setActiveCategory] =
     useState<DeviceCategory>("desktop");
   const [selectedDevice, setSelectedDevice] = useState<Device>(
-    devices.desktop[2], // Full HD as default
+    devices.desktop[2],
   );
   const [customWidth, setCustomWidth] = useState(1920);
   const [customHeight, setCustomHeight] = useState(1080);
@@ -73,9 +76,8 @@ export default function Index() {
   const [errorMessage, setErrorMessage] = useState("");
   const [isRotated, setIsRotated] = useState(false);
   const [zoomLevel, setZoomLevel] = useState("auto");
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const iframeRef = useRef<HTMLIFrameElement>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
 
   const zoomOptions = [
     { value: "auto", label: "Auto Fit" },
@@ -88,16 +90,6 @@ export default function Index() {
     { value: "200", label: "200%" },
   ];
 
-  // Mouse tracking for wave effects
-  useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      setMousePosition({ x: e.clientX, y: e.clientY });
-    };
-
-    window.addEventListener("mousemove", handleMouseMove);
-    return () => window.removeEventListener("mousemove", handleMouseMove);
-  }, []);
-
   const handlePreview = async () => {
     if (!url.trim()) return;
 
@@ -106,7 +98,6 @@ export default function Index() {
     setErrorMessage("");
 
     let formattedUrl = url.trim();
-
     if (
       !formattedUrl.startsWith("http://") &&
       !formattedUrl.startsWith("https://")
@@ -119,8 +110,6 @@ export default function Index() {
       setCurrentUrl(formattedUrl);
       const proxyUrlFormatted = `/api/proxy?url=${encodeURIComponent(formattedUrl)}`;
       setProxyUrl(proxyUrlFormatted);
-
-      // Don't automatically set loading to false - let iframe handle it
     } catch (error) {
       setHasError(true);
       setErrorMessage("Please enter a valid URL");
@@ -141,49 +130,37 @@ export default function Index() {
   };
 
   const handleIframeLoad = () => {
-    // REAL-TIME crawling verification
     const iframe = iframeRef.current;
     if (iframe) {
-      try {
-        // Check if iframe content is actually loaded
-        setTimeout(() => {
-          try {
-            const iframeDoc =
-              iframe.contentDocument || iframe.contentWindow?.document;
-            if (iframeDoc && iframeDoc.readyState === "complete") {
-              // Verify real content is loaded
-              const hasContent =
-                iframeDoc.body && iframeDoc.body.children.length > 0;
-              if (hasContent) {
-                setIsLoading(false);
-                setHasError(false);
-              } else {
-                // Retry loading
-                setTimeout(() => {
-                  setIsLoading(false);
-                  setHasError(false);
-                }, 2000);
-              }
+      setTimeout(() => {
+        try {
+          const iframeDoc =
+            iframe.contentDocument || iframe.contentWindow?.document;
+          if (iframeDoc && iframeDoc.readyState === "complete") {
+            const hasContent =
+              iframeDoc.body && iframeDoc.body.children.length > 0;
+            if (hasContent) {
+              setIsLoading(false);
+              setHasError(false);
             } else {
               setTimeout(() => {
                 setIsLoading(false);
                 setHasError(false);
-              }, 3000);
+              }, 2000);
             }
-          } catch (e) {
-            // Cross-origin - wait for natural loading
+          } else {
             setTimeout(() => {
               setIsLoading(false);
               setHasError(false);
-            }, 4000);
+            }, 3000);
           }
-        }, 1000);
-      } catch (e) {
-        setTimeout(() => {
-          setIsLoading(false);
-          setHasError(false);
-        }, 3000);
-      }
+        } catch (e) {
+          setTimeout(() => {
+            setIsLoading(false);
+            setHasError(false);
+          }, 4000);
+        }
+      }, 1000);
     }
   };
 
@@ -226,16 +203,16 @@ export default function Index() {
       ? selectedDevice.width
       : selectedDevice.height;
 
-  // Enhanced preview size calculation
   const getPreviewDimensions = () => {
     let scale: number;
+    const sidebarWidth = sidebarCollapsed ? 60 : 320;
+    const availableWidth = window.innerWidth - sidebarWidth - 40;
+    const availableHeight = window.innerHeight - 140;
 
     if (zoomLevel === "auto") {
-      const containerWidth = Math.min(window.innerWidth - 100, 1400);
-      const containerHeight = Math.min(window.innerHeight - 350, 900);
       scale = Math.min(
-        containerWidth / currentWidth,
-        containerHeight / currentHeight,
+        availableWidth / currentWidth,
+        availableHeight / currentHeight,
         1.2,
       );
     } else {
@@ -256,281 +233,249 @@ export default function Index() {
   } = getPreviewDimensions();
 
   return (
-    <div
-      ref={containerRef}
-      className="min-h-screen relative overflow-hidden"
-      style={{
-        background: `
-          radial-gradient(circle at ${mousePosition.x}px ${mousePosition.y}px, 
-            rgba(59, 130, 246, 0.15) 0%, 
-            rgba(147, 197, 253, 0.1) 25%, 
-            rgba(219, 234, 254, 0.05) 50%, 
-            transparent 70%),
-          linear-gradient(135deg, 
-            #f1f5f9 0%, 
-            #e0f2fe 25%, 
-            #dbeafe 50%, 
-            #e0e7ff 75%, 
-            #f1f5f9 100%)
-        `,
-      }}
-    >
-      {/* Wave Animation Styles */}
-      <style jsx>{`
-        @keyframes logoFloat {
-          0%,
-          100% {
-            transform: translateY(0px) rotate(0deg) scale(1);
-          }
-          50% {
-            transform: translateY(-8px) rotate(2deg) scale(1.02);
-          }
-        }
-
-        @keyframes waveEffect {
-          0%,
-          100% {
-            transform: translateX(-50%) translateY(0px) scale(1);
-          }
-          50% {
-            transform: translateX(-50%) translateY(-10px) scale(1.1);
-          }
-        }
-
-        .logo-animated {
-          animation: logoFloat 4s ease-in-out infinite;
-          filter: drop-shadow(0 10px 25px rgba(59, 130, 246, 0.3));
-        }
-
-        .wave-bg::before {
-          content: "";
-          position: absolute;
-          top: 0;
-          left: 0;
-          right: 0;
-          bottom: 0;
-          background: radial-gradient(
-            circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
-            rgba(59, 130, 246, 0.1) 0%,
-            rgba(147, 197, 253, 0.05) 30%,
-            transparent 60%
-          );
-          animation: waveEffect 3s ease-in-out infinite;
-          pointer-events: none;
-        }
-
-        @media (max-width: 768px) {
-          .responsive-container {
-            padding: 16px;
-          }
-          .responsive-grid {
-            grid-template-columns: 1fr;
-          }
-          .responsive-flex {
-            flex-direction: column;
-            gap: 12px;
-          }
-          .responsive-text {
-            font-size: 14px;
-          }
-          .mobile-hidden {
-            display: none;
-          }
-        }
-      `}</style>
-
-      {/* Enhanced Header with Larger Logo */}
-      <div className="bg-white/90 backdrop-blur-xl border-b border-blue-200/50 shadow-lg relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-blue-50/50 via-indigo-50/30 to-blue-50/50"></div>
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 py-8 responsive-container">
-          <div className="flex justify-center">
-            <div className="relative">
-              <img
-                src="https://cdn.builder.io/api/v1/image/assets%2F2f9afe8dc22849b186c0fc07b1bbb4f9%2F2f9de9187e1c4134988baa17156cc2c7?format=webp&width=800"
-                alt="RespoCheck"
-                className="w-24 h-24 sm:w-32 sm:h-32 md:w-40 md:h-40 lg:w-48 lg:h-48 object-contain logo-animated"
-              />
-            </div>
+    <div className="h-screen flex bg-slate-50">
+      {/* Sidebar */}
+      <div
+        className={cn(
+          "bg-white border-r border-slate-200 flex flex-col transition-all duration-300 shadow-lg",
+          sidebarCollapsed ? "w-16" : "w-80",
+        )}
+      >
+        {/* Sidebar Header */}
+        <div className="p-4 border-b border-slate-200 bg-gradient-to-r from-blue-50 to-indigo-50">
+          <div className="flex items-center justify-between">
+            {!sidebarCollapsed && (
+              <div className="flex items-center gap-3">
+                <img
+                  src="https://cdn.builder.io/api/v1/image/assets%2F2f9afe8dc22849b186c0fc07b1bbb4f9%2F2f9de9187e1c4134988baa17156cc2c7?format=webp&width=800"
+                  alt="RespoCheck"
+                  className="w-8 h-8 object-contain"
+                />
+                <h1 className="text-lg font-bold text-blue-700">RespoCheck</h1>
+              </div>
+            )}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+              className="p-2"
+            >
+              {sidebarCollapsed ? (
+                <Maximize2 className="w-4 h-4" />
+              ) : (
+                <Minimize2 className="w-4 h-4" />
+              )}
+            </Button>
           </div>
         </div>
-      </div>
 
-      {/* Main Interface */}
-      <div className="max-w-7xl mx-auto p-4 sm:p-6 responsive-container relative">
-        {/* URL Input with Logo Colors */}
-        <div className="bg-white/90 backdrop-blur-xl rounded-2xl shadow-xl border border-blue-200/50 p-6 sm:p-8 mb-6 relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-br from-blue-50/50 via-indigo-50/30 to-blue-100/50"></div>
-          <div className="relative">
-            <div className="flex flex-col sm:flex-row gap-4 responsive-flex">
+        {/* URL Input */}
+        {!sidebarCollapsed && (
+          <div className="p-4 border-b border-slate-200">
+            <div className="space-y-3">
               <Input
                 type="url"
-                placeholder="Enter website URL (e.g., https://example.com)"
+                placeholder="Enter website URL..."
                 value={url}
                 onChange={(e) => setUrl(e.target.value)}
                 onKeyPress={handleKeyPress}
-                className="flex-1 h-14 sm:h-16 text-base bg-white/95 border-blue-300 focus:border-blue-500 focus:ring-blue-500/30 shadow-lg"
+                className="h-10 text-sm border-blue-200 focus:border-blue-400"
               />
               <Button
                 onClick={handlePreview}
                 disabled={!url.trim() || isLoading}
-                className="h-14 sm:h-16 px-6 sm:px-8 bg-gradient-to-r from-blue-500 via-indigo-500 to-blue-600 hover:from-blue-600 hover:via-indigo-600 hover:to-blue-700 text-white font-semibold text-base shadow-xl"
+                className="w-full h-9 bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white text-sm"
               >
-                {isLoading ? "Real-time Crawling..." : "Preview Website"}
+                {isLoading ? "Loading..." : "Preview"}
               </Button>
             </div>
           </div>
-        </div>
+        )}
 
-        {/* Device Categories with Logo Colors */}
-        <div className="bg-white/90 backdrop-blur-xl rounded-2xl shadow-xl border border-blue-200/50 mb-6 relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-br from-blue-50/30 via-indigo-50/20 to-blue-100/30"></div>
-          <div className="relative">
-            {/* Category Tabs */}
-            <div className="border-b border-blue-200/50">
-              <div className="flex flex-col sm:flex-row">
-                <button
-                  onClick={() => handleCategoryChange("desktop")}
-                  className={cn(
-                    "flex items-center justify-center sm:justify-start gap-3 px-6 sm:px-8 py-4 border-b-2 font-semibold text-sm sm:text-base transition-all responsive-text",
-                    activeCategory === "desktop"
-                      ? "border-blue-500 text-blue-700 bg-blue-100/50"
-                      : "border-transparent text-gray-600 hover:text-blue-600 hover:border-blue-300",
-                  )}
-                >
-                  <Monitor className="w-5 h-5" />
-                  Desktop & Laptops
-                </button>
-                <button
-                  onClick={() => handleCategoryChange("tablet")}
-                  className={cn(
-                    "flex items-center justify-center sm:justify-start gap-3 px-6 sm:px-8 py-4 border-b-2 font-semibold text-sm sm:text-base transition-all responsive-text",
-                    activeCategory === "tablet"
-                      ? "border-blue-500 text-blue-700 bg-blue-100/50"
-                      : "border-transparent text-gray-600 hover:text-blue-600 hover:border-blue-300",
-                  )}
-                >
-                  <Tablet className="w-5 h-5" />
-                  Tablets
-                </button>
-                <button
-                  onClick={() => handleCategoryChange("mobile")}
-                  className={cn(
-                    "flex items-center justify-center sm:justify-start gap-3 px-6 sm:px-8 py-4 border-b-2 font-semibold text-sm sm:text-base transition-all responsive-text",
-                    activeCategory === "mobile"
-                      ? "border-blue-500 text-blue-700 bg-blue-100/50"
-                      : "border-transparent text-gray-600 hover:text-blue-600 hover:border-blue-300",
-                  )}
-                >
-                  <Smartphone className="w-5 h-5" />
-                  Mobile Phones
-                </button>
-              </div>
+        {/* Device Categories */}
+        {!sidebarCollapsed && (
+          <div className="flex-1 overflow-y-auto">
+            {/* Desktop */}
+            <div className="border-b border-slate-100">
+              <button
+                onClick={() => handleCategoryChange("desktop")}
+                className={cn(
+                  "w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-slate-50 transition-colors",
+                  activeCategory === "desktop"
+                    ? "bg-blue-50 text-blue-700 border-r-2 border-blue-500"
+                    : "text-slate-700",
+                )}
+              >
+                <Monitor className="w-5 h-5" />
+                <span className="font-medium">Desktop</span>
+              </button>
+              {activeCategory === "desktop" && (
+                <div className="bg-slate-50">
+                  {devices.desktop.map((device) => (
+                    <button
+                      key={device.id}
+                      onClick={() => handleDeviceSelect(device)}
+                      className={cn(
+                        "w-full px-8 py-2 text-left text-sm hover:bg-blue-50 transition-colors",
+                        selectedDevice.id === device.id && !useCustomSize
+                          ? "bg-blue-100 text-blue-700 font-medium"
+                          : "text-slate-600",
+                      )}
+                    >
+                      <div className="truncate">{device.name}</div>
+                      <div className="text-xs text-slate-500">
+                        {device.width} × {device.height}
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
 
-            {/* Device Options */}
-            <div className="p-6">
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-6 responsive-grid">
-                {devices[activeCategory].map((device) => (
-                  <button
-                    key={device.id}
-                    onClick={() => handleDeviceSelect(device)}
-                    className={cn(
-                      "p-4 text-left border-2 rounded-xl transition-all hover:border-blue-400 hover:bg-blue-50/50 hover:shadow-md",
-                      selectedDevice.id === device.id && !useCustomSize
-                        ? "border-blue-500 bg-blue-100/50 text-blue-700 shadow-lg"
-                        : "border-blue-200 text-gray-700",
-                    )}
-                  >
-                    <div className="font-semibold text-sm mb-1">
-                      {device.name}
-                    </div>
-                    <div className="text-xs text-gray-600">
-                      {device.width} × {device.height}px
-                    </div>
-                  </button>
-                ))}
-              </div>
-
-              {/* Custom Size Controls */}
-              <div className="border-t border-blue-200/50 pt-6">
-                <div className="flex items-center gap-3 mb-4">
-                  <Settings className="w-5 h-5 text-blue-600" />
-                  <span className="font-semibold text-blue-700 text-sm sm:text-base">
-                    Custom Size Controls
-                  </span>
+            {/* Tablet */}
+            <div className="border-b border-slate-100">
+              <button
+                onClick={() => handleCategoryChange("tablet")}
+                className={cn(
+                  "w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-slate-50 transition-colors",
+                  activeCategory === "tablet"
+                    ? "bg-blue-50 text-blue-700 border-r-2 border-blue-500"
+                    : "text-slate-700",
+                )}
+              >
+                <Tablet className="w-5 h-5" />
+                <span className="font-medium">Tablet</span>
+              </button>
+              {activeCategory === "tablet" && (
+                <div className="bg-slate-50">
+                  {devices.tablet.map((device) => (
+                    <button
+                      key={device.id}
+                      onClick={() => handleDeviceSelect(device)}
+                      className={cn(
+                        "w-full px-8 py-2 text-left text-sm hover:bg-blue-50 transition-colors",
+                        selectedDevice.id === device.id && !useCustomSize
+                          ? "bg-blue-100 text-blue-700 font-medium"
+                          : "text-slate-600",
+                      )}
+                    >
+                      <div className="truncate">{device.name}</div>
+                      <div className="text-xs text-slate-500">
+                        {device.width} × {device.height}
+                      </div>
+                    </button>
+                  ))}
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <label className="block text-sm font-semibold text-blue-700 mb-3">
-                      Width: {customWidth}px
-                    </label>
-                    <Slider
-                      value={[customWidth]}
-                      onValueChange={(value) => {
-                        setCustomWidth(value[0]);
-                        enableCustomSize();
-                      }}
-                      max={3840}
-                      min={320}
-                      step={10}
-                      className="w-full"
-                    />
-                    <div className="flex justify-between text-xs text-gray-500 mt-1">
-                      <span>320px</span>
-                      <span>3840px</span>
-                    </div>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-semibold text-blue-700 mb-3">
-                      Height: {customHeight}px
-                    </label>
-                    <Slider
-                      value={[customHeight]}
-                      onValueChange={(value) => {
-                        setCustomHeight(value[0]);
-                        enableCustomSize();
-                      }}
-                      max={2160}
-                      min={240}
-                      step={10}
-                      className="w-full"
-                    />
-                    <div className="flex justify-between text-xs text-gray-500 mt-1">
-                      <span>240px</span>
-                      <span>2160px</span>
-                    </div>
-                  </div>
+              )}
+            </div>
+
+            {/* Mobile */}
+            <div className="border-b border-slate-100">
+              <button
+                onClick={() => handleCategoryChange("mobile")}
+                className={cn(
+                  "w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-slate-50 transition-colors",
+                  activeCategory === "mobile"
+                    ? "bg-blue-50 text-blue-700 border-r-2 border-blue-500"
+                    : "text-slate-700",
+                )}
+              >
+                <Smartphone className="w-5 h-5" />
+                <span className="font-medium">Mobile</span>
+              </button>
+              {activeCategory === "mobile" && (
+                <div className="bg-slate-50">
+                  {devices.mobile.map((device) => (
+                    <button
+                      key={device.id}
+                      onClick={() => handleDeviceSelect(device)}
+                      className={cn(
+                        "w-full px-8 py-2 text-left text-sm hover:bg-blue-50 transition-colors",
+                        selectedDevice.id === device.id && !useCustomSize
+                          ? "bg-blue-100 text-blue-700 font-medium"
+                          : "text-slate-600",
+                      )}
+                    >
+                      <div className="truncate">{device.name}</div>
+                      <div className="text-xs text-slate-500">
+                        {device.width} × {device.height}
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Custom Size */}
+            <div className="p-4 space-y-4">
+              <div className="flex items-center gap-2 text-sm font-medium text-slate-700">
+                <Settings className="w-4 h-4" />
+                Custom Size
+              </div>
+              <div className="space-y-3">
+                <div>
+                  <label className="block text-xs font-medium text-slate-600 mb-1">
+                    Width: {customWidth}px
+                  </label>
+                  <Slider
+                    value={[customWidth]}
+                    onValueChange={(value) => {
+                      setCustomWidth(value[0]);
+                      enableCustomSize();
+                    }}
+                    max={3840}
+                    min={320}
+                    step={10}
+                    className="w-full"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-slate-600 mb-1">
+                    Height: {customHeight}px
+                  </label>
+                  <Slider
+                    value={[customHeight]}
+                    onValueChange={(value) => {
+                      setCustomHeight(value[0]);
+                      enableCustomSize();
+                    }}
+                    max={2160}
+                    min={240}
+                    step={10}
+                    className="w-full"
+                  />
                 </div>
               </div>
             </div>
           </div>
-        </div>
+        )}
+      </div>
 
-        {/* Preview Controls */}
-        {proxyUrl && (
-          <div className="bg-white/90 backdrop-blur-xl rounded-2xl shadow-xl border border-blue-200/50 p-4 mb-6 relative overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-r from-blue-50/30 to-indigo-50/30"></div>
-            <div className="relative flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-              <div className="flex flex-wrap items-center gap-3">
-                <Badge
-                  variant="outline"
-                  className="text-sm sm:text-base px-4 py-2 font-mono border-blue-300 text-blue-700 bg-blue-50"
-                >
+      {/* Main Content */}
+      <div className="flex-1 flex flex-col">
+        {/* Top Toolbar */}
+        <div className="bg-white border-b border-slate-200 px-4 py-3 shadow-sm">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              {currentUrl && (
+                <div className="flex items-center gap-2 text-sm">
+                  <Globe className="w-4 h-4 text-slate-500" />
+                  <span className="text-slate-600 truncate max-w-md">
+                    {currentUrl}
+                  </span>
+                </div>
+              )}
+              {proxyUrl && (
+                <Badge variant="outline" className="text-xs">
                   {currentWidth} × {currentHeight}px
                 </Badge>
-                {useCustomSize && (
-                  <Badge className="bg-green-100 text-green-800 border-green-300">
-                    Custom Size
-                  </Badge>
-                )}
-              </div>
-              <div className="flex flex-wrap items-center gap-3">
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-blue-700 font-medium">
-                    Zoom:
-                  </span>
+              )}
+            </div>
+            <div className="flex items-center gap-2">
+              {proxyUrl && (
+                <>
                   <Select value={zoomLevel} onValueChange={setZoomLevel}>
-                    <SelectTrigger className="w-32 border-blue-300 bg-white/90">
+                    <SelectTrigger className="w-24 h-8 text-xs">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -541,86 +486,76 @@ export default function Index() {
                       ))}
                     </SelectContent>
                   </Select>
-                </div>
-
-                {(activeCategory === "tablet" ||
-                  activeCategory === "mobile") && (
+                  {(activeCategory === "tablet" ||
+                    activeCategory === "mobile") && (
+                    <Button
+                      onClick={toggleRotation}
+                      variant="outline"
+                      size="sm"
+                      className="h-8 px-2 text-xs"
+                    >
+                      <RotateCcw className="w-3 h-3 mr-1" />
+                      {isRotated ? "Portrait" : "Landscape"}
+                    </Button>
+                  )}
                   <Button
-                    onClick={toggleRotation}
+                    onClick={openInNewTab}
                     variant="outline"
                     size="sm"
-                    className="gap-2 border-blue-300 text-blue-700 hover:bg-blue-50"
+                    className="h-8 px-2 text-xs"
                   >
-                    <RotateCcw className="w-4 h-4" />
-                    <span className="hidden sm:inline">
-                      {isRotated ? "Portrait" : "Landscape"}
-                    </span>
+                    <ExternalLink className="w-3 h-3 mr-1" />
+                    Open
                   </Button>
-                )}
-
-                <Button
-                  onClick={openInNewTab}
-                  variant="outline"
-                  size="sm"
-                  className="gap-2 border-blue-300 text-blue-700 hover:bg-blue-50"
-                >
-                  <ExternalLink className="w-4 h-4" />
-                  <span className="hidden sm:inline">Open Original</span>
-                </Button>
-              </div>
+                </>
+              )}
             </div>
           </div>
-        )}
+        </div>
 
-        {/* Enhanced Real-Time Preview */}
-        {proxyUrl && (
-          <div
-            className="bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-blue-200/50 p-6 wave-bg relative overflow-hidden"
-            style={
-              {
-                "--mouse-x": `${(mousePosition.x / window.innerWidth) * 100}%`,
-                "--mouse-y": `${(mousePosition.y / window.innerHeight) * 100}%`,
-              } as React.CSSProperties
-            }
-          >
-            <div className="absolute inset-0 bg-gradient-to-br from-blue-50/20 via-indigo-50/10 to-blue-100/20"></div>
-            <div className="relative flex justify-center">
+        {/* Preview Area */}
+        <div className="flex-1 bg-slate-100 p-4 overflow-auto">
+          {proxyUrl ? (
+            <div className="flex justify-center items-start min-h-full">
               <div
-                className="bg-white shadow-2xl overflow-hidden rounded-lg border border-blue-200"
+                className="bg-white shadow-lg rounded-lg overflow-hidden"
                 style={{
-                  width: Math.min(previewWidth, window.innerWidth - 80),
-                  height: Math.min(previewHeight, window.innerHeight - 200),
+                  width: Math.min(
+                    previewWidth,
+                    window.innerWidth - (sidebarCollapsed ? 120 : 360),
+                  ),
+                  height: Math.min(previewHeight, window.innerHeight - 180),
                 }}
               >
                 {isLoading ? (
-                  <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-50">
+                  <div className="w-full h-full flex items-center justify-center bg-slate-50">
                     <div className="text-center">
-                      <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-                      <p className="text-blue-700 font-semibold text-lg">
+                      <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-3"></div>
+                      <p className="text-blue-700 font-medium">
                         Real-time crawling...
                       </p>
-                      <p className="text-blue-600 text-sm mt-2">
-                        Loading all resources live
+                      <p className="text-slate-500 text-sm">
+                        Loading all resources
                       </p>
                     </div>
                   </div>
                 ) : hasError ? (
                   <div className="w-full h-full flex items-center justify-center bg-red-50">
-                    <div className="text-center p-6 sm:p-8">
-                      <AlertCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
-                      <h3 className="text-lg font-semibold text-gray-800 mb-2">
-                        Real-time Crawling Failed
+                    <div className="text-center p-6">
+                      <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-3" />
+                      <h3 className="text-lg font-medium text-slate-800 mb-2">
+                        Loading Failed
                       </h3>
-                      <p className="text-gray-600 mb-4 text-sm sm:text-base">
-                        {errorMessage || "Failed to load website in real-time"}
+                      <p className="text-slate-600 mb-4 text-sm">
+                        {errorMessage || "Failed to load website"}
                       </p>
-                      <div className="flex flex-col sm:flex-row gap-2 justify-center">
+                      <div className="flex gap-2 justify-center">
                         <Button
                           onClick={handlePreview}
                           variant="outline"
                           size="sm"
                         >
-                          Try Again
+                          Retry
                         </Button>
                         <Button onClick={openInNewTab} size="sm">
                           Open Original
@@ -638,12 +573,8 @@ export default function Index() {
                       height: currentHeight,
                       transform: `scale(${scale})`,
                       transformOrigin: "top left",
-                      imageRendering: "auto",
-                      textRendering: "optimizeLegibility",
                     }}
-                    title="Real-time Website Preview"
-                    loading="eager"
-                    importance="high"
+                    title="Website Preview"
                     onError={handleIframeError}
                     onLoad={handleIframeLoad}
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
@@ -651,61 +582,44 @@ export default function Index() {
                 )}
               </div>
             </div>
-            {/* Preview Info */}
-            <div className="text-center mt-6">
-              <div className="inline-flex items-center gap-3 bg-white/90 backdrop-blur-sm rounded-xl px-6 py-3 shadow-lg border border-blue-200">
-                <span className="text-blue-700 font-semibold">
-                  {selectedDevice.name}
-                </span>
-                <Badge
-                  variant="outline"
-                  className="border-blue-300 text-blue-700 bg-blue-50"
-                >
-                  {Math.round(scale * 100)}% zoom
-                </Badge>
-                <span className="text-blue-600">•</span>
-                <span className="text-blue-600 font-medium">
-                  {currentWidth} × {currentHeight}px
-                </span>
-                <span className="text-green-600 font-medium">• Live</span>
+          ) : (
+            <div className="flex items-center justify-center h-full">
+              <div className="text-center">
+                <div className="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <img
+                    src="https://cdn.builder.io/api/v1/image/assets%2F2f9afe8dc22849b186c0fc07b1bbb4f9%2F2f9de9187e1c4134988baa17156cc2c7?format=webp&width=800"
+                    alt="RespoCheck"
+                    className="w-10 h-10 object-contain"
+                  />
+                </div>
+                <h2 className="text-xl font-semibold text-slate-800 mb-2">
+                  Real-Time Responsive Testing
+                </h2>
+                <p className="text-slate-600 max-w-md mx-auto">
+                  Enter a website URL in the sidebar to see live previews across
+                  different devices and screen sizes.
+                </p>
               </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
 
-        {/* Enhanced Empty State */}
-        {!proxyUrl && (
-          <div className="bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-blue-200/50 p-8 sm:p-12 text-center relative overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-br from-blue-50/50 via-indigo-50/30 to-blue-100/50"></div>
-            <div className="relative">
-              <div className="w-20 sm:w-24 h-20 sm:h-24 bg-gradient-to-br from-blue-100 to-indigo-200 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
-                <img
-                  src="https://cdn.builder.io/api/v1/image/assets%2F2f9afe8dc22849b186c0fc07b1bbb4f9%2F2f9de9187e1c4134988baa17156cc2c7?format=webp&width=800"
-                  alt="RespoCheck"
-                  className="w-12 sm:w-14 h-12 sm:h-14 object-contain"
-                />
+        {/* Bottom Status Bar */}
+        {proxyUrl && (
+          <div className="bg-white border-t border-slate-200 px-4 py-2">
+            <div className="flex items-center justify-between text-xs text-slate-600">
+              <div className="flex items-center gap-4">
+                <span>Device: {selectedDevice.name}</span>
+                <span>Scale: {Math.round(scale * 100)}%</span>
+                {useCustomSize && (
+                  <Badge variant="secondary" className="text-xs">
+                    Custom
+                  </Badge>
+                )}
               </div>
-              <h2 className="text-2xl sm:text-3xl font-bold text-blue-800 mb-3">
-                Real-Time Responsive Testing
-              </h2>
-              <p className="text-blue-600 max-w-2xl mx-auto mb-8 text-base sm:text-lg">
-                Enter a website URL above to see live real-time previews on
-                different devices and screen sizes. Complete with live resource
-                crawling.
-              </p>
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-6 sm:gap-8 text-sm text-blue-600">
-                <div className="flex items-center gap-2">
-                  <Monitor className="w-5 h-5" />
-                  Desktop & Laptops
-                </div>
-                <div className="flex items-center gap-2">
-                  <Tablet className="w-5 h-5" />
-                  Tablets
-                </div>
-                <div className="flex items-center gap-2">
-                  <Smartphone className="w-5 h-5" />
-                  Mobile Phones
-                </div>
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                <span>Live Preview</span>
               </div>
             </div>
           </div>
