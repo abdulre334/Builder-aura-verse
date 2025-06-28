@@ -56,16 +56,16 @@ export const handleProxy: RequestHandler = async (req, res) => {
 
         attempts++;
         if (attempts < maxAttempts) {
-          console.log(`⚠️ Fast retry ${attempts}...`);
-          await new Promise((resolve) => setTimeout(resolve, 500)); // Faster retry
+          console.log(`⚠️ Ultra-fast retry ${attempts}...`);
+          await new Promise((resolve) => setTimeout(resolve, 100)); // Ultra-fast retry
         }
       } catch (error) {
         attempts++;
         if (attempts >= maxAttempts) {
           throw error;
         }
-        console.log(`⚠️ Fast retry ${attempts} after error...`);
-        await new Promise((resolve) => setTimeout(resolve, 500)); // Faster retry
+        console.log(`⚠️ Ultra-fast retry ${attempts} after error...`);
+        await new Promise((resolve) => setTimeout(resolve, 100)); // Ultra-fast retry
       }
     }
 
