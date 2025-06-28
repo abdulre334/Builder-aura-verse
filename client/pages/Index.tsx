@@ -598,15 +598,18 @@ export default function Index() {
                     src={proxyUrl}
                     className="w-full h-full border-0"
                     style={{
-                      width: currentWidth,
-                      height: currentHeight,
+                      width: `${currentWidth}px`,
+                      height: `${currentHeight}px`,
                       transform: `scale(${scale})`,
                       transformOrigin: "top left",
+                      backgroundColor: "white",
                     }}
                     title="Website Preview"
                     onError={handleIframeError}
                     onLoad={handleIframeLoad}
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
+                    sandbox="allow-same-origin allow-scripts allow-forms allow-modals allow-popups allow-presentation allow-downloads"
+                    loading="eager"
                   />
                 )}
               </div>
