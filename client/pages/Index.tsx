@@ -137,39 +137,39 @@ export default function Index() {
   };
 
   const handleIframeLoad = () => {
-    // Wait for all resources to load (CSS, images, icons, etc.)
+    // Enhanced loading to ensure all resources are loaded
     const iframe = iframeRef.current;
     if (iframe && iframe.contentWindow) {
       try {
         const iframeDoc =
           iframe.contentDocument || iframe.contentWindow.document;
 
-        // Wait for document ready state and all resources
-        if (iframeDoc.readyState === "complete") {
-          // Additional delay to ensure all CSS and icons are rendered
-          setTimeout(() => {
-            setIsLoading(false);
-            setHasError(false);
-          }, 1500); // Give extra time for full rendering
-        } else {
-          // If not ready, wait a bit more
-          setTimeout(() => {
-            setIsLoading(false);
-            setHasError(false);
-          }, 2000);
-        }
+        // Wait for complete document loading including all resources
+        const checkComplete = () => {
+          if (iframeDoc.readyState === "complete") {
+            // Additional wait for fonts, images, and CSS to render
+            setTimeout(() => {
+              setIsLoading(false);
+              setHasError(false);
+            }, 3000); // Longer wait for complete rendering
+          } else {
+            setTimeout(checkComplete, 500);
+          }
+        };
+
+        checkComplete();
       } catch (e) {
-        // Cross-origin issues, just wait a bit longer
+        // Cross-origin restrictions, wait longer
         setTimeout(() => {
           setIsLoading(false);
           setHasError(false);
-        }, 2000);
+        }, 4000);
       }
     } else {
       setTimeout(() => {
         setIsLoading(false);
         setHasError(false);
-      }, 1500);
+      }, 3000);
     }
   };
 
@@ -243,7 +243,7 @@ export default function Index() {
 
     return {
       width: currentWidth * scale,
-      height: currentHeight * scale,
+      height: previewHeight * scale,
       scale,
     };
   };
@@ -256,19 +256,22 @@ export default function Index() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Simple Clean Header */}
+      {/* Clean Header with RespoCheck Branding */}
       <div className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-6 py-4">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-blue-500 rounded-lg">
-              <Globe className="w-6 h-6 text-white" />
+          <div className="flex items-center gap-4">
+            {/* RespoCheck Logo */}
+            <div className="relative">
+              <img
+                src="https://cdn.builder.io/api/v1/image/assets%2F2f9afe8dc22849b186c0fc07b1bbb4f9%2F5fe2031174b94cc7b66976474410e316?format=webp&width=800"
+                alt="RespoCheck Logo"
+                className="w-12 h-12 object-contain"
+              />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-gray-900">
-                ResponsiveViewer
-              </h1>
+              <h1 className="text-2xl font-bold text-gray-900">RespoCheck</h1>
               <p className="text-sm text-gray-600">
-                Test your website on different screen sizes
+                Professional responsive design testing tool
               </p>
             </div>
           </div>
@@ -293,7 +296,7 @@ export default function Index() {
               disabled={!url.trim() || isLoading}
               className="h-12 px-8 bg-blue-500 hover:bg-blue-600 text-base font-medium"
             >
-              {isLoading ? "Loading..." : "Test Website"}
+              {isLoading ? "Loading..." : "Check Responsiveness"}
             </Button>
           </div>
         </div>
@@ -490,12 +493,12 @@ export default function Index() {
           </div>
         )}
 
-        {/* Clean Preview */}
+        {/* Clean Preview - NO BORDERS for mobile/tablet */}
         {proxyUrl && (
           <div className="bg-white rounded-lg shadow-sm border p-6">
             <div className="flex justify-center">
               <div
-                className="bg-white shadow-xl overflow-hidden border border-gray-200"
+                className="bg-white shadow-xl overflow-hidden"
                 style={{
                   width: previewWidth,
                   height: previewHeight,
@@ -506,7 +509,10 @@ export default function Index() {
                     <div className="text-center">
                       <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
                       <p className="text-gray-600 font-medium text-lg">
-                        Loading preview...
+                        Loading website resources...
+                      </p>
+                      <p className="text-gray-500 text-sm mt-2">
+                        Fetching fonts, images, and styles
                       </p>
                     </div>
                   </div>
@@ -553,7 +559,7 @@ export default function Index() {
                     importance="high"
                     onError={handleIframeError}
                     onLoad={handleIframeLoad}
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                   />
                 )}
               </div>
@@ -570,15 +576,19 @@ export default function Index() {
         {!proxyUrl && (
           <div className="bg-white rounded-lg shadow-sm border p-12 text-center">
             <div className="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-6">
-              <Globe className="w-10 h-10 text-blue-500" />
+              <img
+                src="https://cdn.builder.io/api/v1/image/assets%2F2f9afe8dc22849b186c0fc07b1bbb4f9%2F5fe2031174b94cc7b66976474410e316?format=webp&width=800"
+                alt="RespoCheck"
+                className="w-10 h-10 object-contain"
+              />
             </div>
             <h2 className="text-2xl font-semibold text-gray-900 mb-3">
-              Test Your Website's Responsiveness
+              Test Website Responsiveness
             </h2>
             <p className="text-gray-600 max-w-2xl mx-auto mb-6">
               Enter a website URL above to see how it looks on different devices
-              and screen sizes. Use the zoom controls and custom dimensions for
-              precise testing.
+              and screen sizes. Get pixel-perfect previews with complete
+              resource loading.
             </p>
             <div className="flex items-center justify-center gap-8 text-sm text-gray-500">
               <div className="flex items-center gap-2">
