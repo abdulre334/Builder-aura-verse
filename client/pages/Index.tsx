@@ -208,10 +208,32 @@ export default function Index() {
 
   const toggleRotation = () => {
     setIsRotated(!isRotated);
+
+    // Auto-reload when rotating
+    if (proxyUrl) {
+      setIsLoading(true);
+      setHasError(false);
+      setTimeout(() => {
+        if (iframeRef.current) {
+          iframeRef.current.src = iframeRef.current.src;
+        }
+      }, 50);
+    }
   };
 
   const enableCustomSize = () => {
     setUseCustomSize(true);
+
+    // Auto-reload when using custom size
+    if (proxyUrl) {
+      setIsLoading(true);
+      setHasError(false);
+      setTimeout(() => {
+        if (iframeRef.current) {
+          iframeRef.current.src = iframeRef.current.src;
+        }
+      }, 100);
+    }
   };
 
   const currentWidth = useCustomSize
