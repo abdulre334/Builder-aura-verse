@@ -243,7 +243,7 @@ export default function Index() {
 
     return {
       width: currentWidth * scale,
-      height: previewHeight * scale,
+      height: currentHeight * scale,
       scale,
     };
   };
