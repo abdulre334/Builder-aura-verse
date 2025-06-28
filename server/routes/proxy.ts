@@ -92,28 +92,118 @@ export const handleProxy: RequestHandler = async (req, res) => {
       // Add base tag for resource resolution
       .replace(/<head>/i, `<head><base href="${targetUrl.origin}/">`)
 
-      // Inject minimal compatibility script
+      // Inject responsive testing compatibility script for full page rendering
       .replace(
         /<\/head>/i,
         `
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+        <style>
+          /* Full page rendering optimizations */
+          html, body {
+            overflow-x: auto !important;
+            overflow-y: auto !important;
+            width: 100% !important;
+            height: 100% !important;
+            margin: 0 !important;
+            padding: 0 !important;
+          }
+
+          /* Responsive testing viewport simulation */
+          * {
+            box-sizing: border-box !important;
+          }
+
+          /* Ensure full content visibility */
+          img {
+            max-width: 100% !important;
+            height: auto !important;
+          }
+
+          /* Performance optimizations for real-time viewing */
+          * {
+            -webkit-font-smoothing: antialiased !important;
+            text-rendering: optimizeLegibility !important;
+          }
+        </style>
         <script>
           (function() {
             try {
-              // Minimal frame-busting protection
+              console.log('🔥 RespoCheck: Full Page Rendering Active');
+
+              // Professional responsive testing frame protection
               if (window.top !== window.self) {
                 Object.defineProperty(window, 'top', { value: window.self, writable: false });
                 Object.defineProperty(window, 'parent', { value: window.self, writable: false });
+                Object.defineProperty(window, 'frameElement', { value: null, writable: false });
               }
-              
-              // Quick lazy loading fix
+
+              // Full page rendering - force load all content
               document.addEventListener('DOMContentLoaded', function() {
-                const lazyImages = document.querySelectorAll('img[data-src], img[loading="lazy"]');
+                console.log('📱 Viewport Simulation: Loading all resources');
+
+                // Force load lazy images for full page rendering
+                const lazyImages = document.querySelectorAll('img[data-src], img[data-lazy-src], img[loading="lazy"]');
                 lazyImages.forEach(function(img) {
                   if (img.dataset.src) img.src = img.dataset.src;
+                  if (img.dataset.lazySrc) img.src = img.dataset.lazySrc;
                   img.loading = 'eager';
+                  img.removeAttribute('loading');
+                });
+
+                // Force load lazy iframes
+                const lazyIframes = document.querySelectorAll('iframe[data-src], iframe[loading="lazy"]');
+                lazyIframes.forEach(function(iframe) {
+                  if (iframe.dataset.src) iframe.src = iframe.dataset.src;
+                  iframe.loading = 'eager';
+                });
+
+                // Trigger responsive design updates
+                setTimeout(() => {
+                  window.dispatchEvent(new Event('resize'));
+                  window.dispatchEvent(new Event('scroll'));
+                  window.dispatchEvent(new Event('orientationchange'));
+                }, 100);
+
+                // Monitor for new content (like professional tools)
+                const observer = new MutationObserver(function(mutations) {
+                  mutations.forEach(function(mutation) {
+                    mutation.addedNodes.forEach(function(node) {
+                      if (node.nodeType === 1) {
+                        // Load any new lazy content
+                        const newLazyImages = node.querySelectorAll ? node.querySelectorAll('img[data-src], img[loading="lazy"]') : [];
+                        newLazyImages.forEach(function(img) {
+                          if (img.dataset.src) img.src = img.dataset.src;
+                          img.loading = 'eager';
+                        });
+                      }
+                    });
+                  });
+                });
+
+                observer.observe(document.body, {
+                  childList: true,
+                  subtree: true
                 });
               });
-            } catch (e) {}
+
+              // Real-time responsive testing enhancements
+              window.addEventListener('load', function() {
+                console.log('✅ Full Page Rendering Complete');
+
+                // Force responsive layout recalculation
+                setTimeout(() => {
+                  const elements = document.querySelectorAll('*');
+                  elements.forEach(el => {
+                    if (el.style.width === 'auto' || el.style.maxWidth) {
+                      el.style.width = el.style.width;
+                    }
+                  });
+                }, 200);
+              });
+
+            } catch (e) {
+              console.warn('⚠️ Responsive testing script error:', e);
+            }
           })();
         </script>
         </head>`,
