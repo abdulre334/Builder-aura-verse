@@ -88,128 +88,19 @@ export const handleProxy: RequestHandler = async (req, res) => {
 
     console.log(`📄 Content length: ${content.length} characters`);
 
-    // ULTRA-FAST content processing for real-time loading
+    // MINIMAL processing for ultra-fast loading (like 4-second websites)
     content = content
-      // Remove iframe blocking (faster regex)
+      // Only remove frame blocking - nothing else
       .replace(
-        /(?:<meta[^>]*?(?:http-equiv|name)=['"]?(?:X-Frame-Options|x-frame-options|Content-Security-Policy|content-security-policy)['"]?[^>]*?>)/gi,
+        /<meta[^>]*http-equiv=['"](X-Frame-Options|x-frame-options)['"'][^>]*>/gi,
         "",
       )
       .replace(
-        /<meta[^>]*name=['"](referrer)['"'][^>]*>/gi,
-        '<meta name="referrer" content="unsafe-url">',
+        /<meta[^>]*http-equiv=['"](Content-Security-Policy|content-security-policy)['"'][^>]*>/gi,
+        "",
       )
-
-      // Fix ALL resource URLs for real-time loading
-      .replace(/src=['"]([^'"]*)['"]/gi, (match, src) => {
-        if (
-          src.startsWith("data:") ||
-          src.startsWith("blob:") ||
-          src.startsWith("javascript:")
-        )
-          return match;
-
-        try {
-          if (src.startsWith("//")) {
-            return `src="${targetUrl.protocol}${src}"`;
-          } else if (src.startsWith("/")) {
-            return `src="${targetUrl.origin}${src}"`;
-          } else if (!src.startsWith("http")) {
-            const absoluteUrl = new URL(src, targetUrl.href);
-            return `src="${absoluteUrl.href}"`;
-          }
-        } catch (e) {
-          console.warn(`⚠️ Failed to resolve src: ${src}`);
-        }
-        return match;
-      })
-
-      .replace(/href=['"]([^'"]*)['"]/gi, (match, href) => {
-        if (
-          href.startsWith("data:") ||
-          href.startsWith("javascript:") ||
-          href.startsWith("#") ||
-          href.startsWith("mailto:") ||
-          href.startsWith("tel:")
-        )
-          return match;
-
-        try {
-          if (href.startsWith("//")) {
-            return `href="${targetUrl.protocol}${href}"`;
-          } else if (href.startsWith("/")) {
-            return `href="${targetUrl.origin}${href}"`;
-          } else if (!href.startsWith("http")) {
-            const absoluteUrl = new URL(href, targetUrl.href);
-            return `href="${absoluteUrl.href}"`;
-          }
-        } catch (e) {
-          console.warn(`⚠️ Failed to resolve href: ${href}`);
-        }
-        return match;
-      })
-
-      // Fix CSS URLs
-      .replace(/url\(['"]?([^'"]*?)['"]?\)/gi, (match, url) => {
-        if (url.startsWith("data:") || url.startsWith("blob:")) return match;
-
-        try {
-          if (url.startsWith("//")) {
-            return `url("${targetUrl.protocol}${url}")`;
-          } else if (url.startsWith("/")) {
-            return `url("${targetUrl.origin}${url}")`;
-          } else if (!url.startsWith("http")) {
-            const absoluteUrl = new URL(url, targetUrl.href);
-            return `url("${absoluteUrl.href}")`;
-          }
-        } catch (e) {
-          console.warn(`⚠️ Failed to resolve CSS url: ${url}`);
-        }
-        return match;
-      })
-
-      // Add comprehensive base tag
+      // Add base tag only
       .replace(/<head>/i, `<head><base href="${targetUrl.origin}/">`)
-
-      // Inject ENHANCED real-time compatibility script
-      .replace(
-        /<\/head>/i,
-        `
-        <style>
-          /* Ultra-fast rendering optimizations */
-          * { box-sizing: border-box !important; }
-          html, body {
-            width: 100% !important;
-            height: 100% !important;
-            margin: 0 !important;
-            padding: 0 !important;
-            overflow-x: auto !important;
-          }
-          /* Performance optimizations */
-          img { image-rendering: auto !important; }
-          * { -webkit-font-smoothing: antialiased !important; }
-          /* Hide interfering elements */
-          .loading, .loader, .spinner, .preloader,
-          [class*="loading"], [id*="loading"],
-          [class*="loader"], [id*="loader"] {
-            display: none !important;
-            visibility: hidden !important;
-          }
-        </style>
-        <script>
-          // Enhanced real-time loading
-          (function() {
-            try {
-              // Speed up loading
-              if (window.requestIdleCallback) {
-                window.requestIdleCallback = window.requestAnimationFrame;
-              }
-              // Remove blocking scripts
-              const scripts = document.querySelectorAll('script[src*="analytics"], script[src*="tracking"], script[src*="gtag"]');
-              scripts.forEach(s => s.remove());
-            } catch(e) {}
-          })();
-        </script>
         <script>
           (function() {
             console.log('🚀 RespoCheck Real-time Crawling Active');
