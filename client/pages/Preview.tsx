@@ -20,7 +20,6 @@ import {
   ArrowLeft,
   Home,
   Laptop,
-  Watch,
   Tv,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -199,15 +198,13 @@ export default function Preview() {
   }, [searchParams]);
 
   const calculateAutoFit = () => {
-    // Better calculation for preview area
-    const availableWidth = window.innerWidth - 100; // More precise margins
-    const availableHeight = window.innerHeight - 140; // Account for headers
+    const availableWidth = window.innerWidth - 100;
+    const availableHeight = window.innerHeight - 140;
 
     const scaleX = availableWidth / currentWidth;
     const scaleY = availableHeight / currentHeight;
 
-    // Allow larger scaling for better preview quality
-    return Math.min(scaleX, scaleY, 2.0); // Up to 200% for better quality
+    return Math.min(scaleX, scaleY, 2.0);
   };
 
   const handleIframeError = () => {
@@ -217,39 +214,37 @@ export default function Preview() {
   };
 
   const handleIframeLoad = () => {
-    // Wait for all resources to load completely (CSS, images, icons, fonts)
+    // Enhanced loading for complete resource fetching
     const iframe = iframeRef.current;
     if (iframe && iframe.contentWindow) {
       try {
         const iframeDoc =
           iframe.contentDocument || iframe.contentWindow.document;
 
-        // Check if document and all resources are fully loaded
-        if (iframeDoc.readyState === "complete") {
-          // Extra delay to ensure CSS, fonts, and icons are fully rendered
-          setTimeout(() => {
-            setIsLoading(false);
-            setHasError(false);
-          }, 2000); // Longer delay for complete rendering
-        } else {
-          // Document not ready, wait longer
-          setTimeout(() => {
-            setIsLoading(false);
-            setHasError(false);
-          }, 3000);
-        }
+        const checkComplete = () => {
+          if (iframeDoc.readyState === "complete") {
+            // Wait longer for fonts, CSS, and images to fully render
+            setTimeout(() => {
+              setIsLoading(false);
+              setHasError(false);
+            }, 4000); // Extended wait for complete rendering
+          } else {
+            setTimeout(checkComplete, 500);
+          }
+        };
+
+        checkComplete();
       } catch (e) {
-        // Cross-origin restrictions, use longer timeout
         setTimeout(() => {
           setIsLoading(false);
           setHasError(false);
-        }, 3000);
+        }, 5000);
       }
     } else {
       setTimeout(() => {
         setIsLoading(false);
         setHasError(false);
-      }, 2500);
+      }, 4000);
     }
   };
 
@@ -316,11 +311,13 @@ export default function Preview() {
               Back
             </Button>
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-blue-500 rounded-lg">
-                <Globe className="w-5 h-5 text-white" />
-              </div>
+              <img
+                src="https://cdn.builder.io/api/v1/image/assets%2F2f9afe8dc22849b186c0fc07b1bbb4f9%2F5fe2031174b94cc7b66976474410e316?format=webp&width=800"
+                alt="RespoCheck Logo"
+                className="w-8 h-8 object-contain"
+              />
               <div>
-                <h1 className="text-white font-semibold">ResponsiveViewer</h1>
+                <h1 className="text-white font-semibold">RespoCheck</h1>
               </div>
             </div>
           </div>
@@ -416,7 +413,7 @@ export default function Preview() {
         </div>
       </div>
 
-      {/* Professional Preview Area with Grid Background */}
+      {/* Professional Preview Area with Grid Background - NO BORDERS */}
       <div
         className="flex-1 flex items-center justify-center p-8 relative overflow-hidden"
         style={{
@@ -429,108 +426,61 @@ export default function Preview() {
       >
         {proxyUrl ? (
           <div className="relative">
-            {/* Realistic Device Frame */}
+            {/* Clean Preview Container - NO DEVICE FRAMES OR BORDERS */}
             <div
-              className={cn(
-                "relative overflow-hidden shadow-2xl",
-                selectedDevice.category === "mobile" &&
-                  "bg-gray-900 rounded-[2.5rem] p-4",
-                selectedDevice.category === "tablet" &&
-                  "bg-gray-800 rounded-2xl p-3",
-                selectedDevice.category === "desktop" &&
-                  "bg-gray-700 rounded-lg",
-              )}
+              className="bg-white shadow-2xl overflow-hidden"
               style={{
-                width:
-                  selectedDevice.category === "desktop"
-                    ? previewWidth + 20
-                    : previewWidth + 40,
-                height:
-                  selectedDevice.category === "desktop"
-                    ? previewHeight + 20
-                    : previewHeight + 50,
+                width: previewWidth,
+                height: previewHeight,
               }}
             >
-              {/* Mobile Device Details */}
-              {selectedDevice.category === "mobile" && (
-                <>
-                  {/* Dynamic Island / Notch */}
-                  <div className="absolute top-2 left-1/2 transform -translate-x-1/2 w-24 h-2 bg-black rounded-full z-20"></div>
-                  {/* Home Indicator */}
-                  <div className="absolute bottom-1 left-1/2 transform -translate-x-1/2 w-16 h-1 bg-gray-600 rounded-full z-20"></div>
-                  {/* Power Button */}
-                  <div className="absolute -right-1 top-24 w-1 h-12 bg-gray-600 rounded-l"></div>
-                  {/* Volume Buttons */}
-                  <div className="absolute -left-1 top-20 w-1 h-8 bg-gray-600 rounded-r"></div>
-                  <div className="absolute -left-1 top-32 w-1 h-8 bg-gray-600 rounded-r"></div>
-                </>
-              )}
-
-              {/* Tablet Device Details */}
-              {selectedDevice.category === "tablet" && (
-                <>
-                  <div className="absolute bottom-1 left-1/2 transform -translate-x-1/2 w-12 h-12 border-2 border-gray-600 rounded-full bg-gray-800"></div>
-                </>
-              )}
-
-              {/* Preview Content */}
-              <div
-                className={cn(
-                  "bg-white overflow-hidden relative",
-                  selectedDevice.category === "mobile" && "rounded-3xl m-3",
-                  selectedDevice.category === "tablet" && "rounded-xl m-2",
-                  selectedDevice.category === "desktop" && "rounded m-2",
-                )}
-                style={{
-                  width: previewWidth,
-                  height: previewHeight,
-                }}
-              >
-                {isLoading ? (
-                  <div className="w-full h-full flex items-center justify-center bg-gray-100">
-                    <div className="text-center">
-                      <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-                      <p className="text-gray-600 font-medium">
-                        Loading preview...
-                      </p>
-                    </div>
+              {isLoading ? (
+                <div className="w-full h-full flex items-center justify-center bg-gray-100">
+                  <div className="text-center">
+                    <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                    <p className="text-gray-600 font-medium">
+                      Loading website resources...
+                    </p>
+                    <p className="text-gray-500 text-sm mt-2">
+                      Fetching fonts, styles, and images
+                    </p>
                   </div>
-                ) : hasError ? (
-                  <div className="w-full h-full flex items-center justify-center bg-red-50">
-                    <div className="text-center p-8">
-                      <AlertCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
-                      <h3 className="text-lg font-semibold text-gray-800 mb-2">
-                        Cannot Load Website
-                      </h3>
-                      <p className="text-gray-600 mb-4">{errorMessage}</p>
-                      <Button onClick={openInNewTab} size="sm">
-                        <ExternalLink className="w-4 h-4 mr-2" />
-                        Open Original
-                      </Button>
-                    </div>
+                </div>
+              ) : hasError ? (
+                <div className="w-full h-full flex items-center justify-center bg-red-50">
+                  <div className="text-center p-8">
+                    <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
+                    <h3 className="font-semibold text-gray-800 mb-2">
+                      Cannot Load Website
+                    </h3>
+                    <p className="text-gray-600 text-sm mb-4">{errorMessage}</p>
+                    <Button onClick={openInNewTab} size="sm">
+                      <ExternalLink className="w-4 h-4 mr-2" />
+                      Open Original
+                    </Button>
                   </div>
-                ) : (
-                  <iframe
-                    ref={iframeRef}
-                    src={proxyUrl}
-                    className="w-full h-full border-0"
-                    style={{
-                      width: currentWidth,
-                      height: currentHeight,
-                      transform: `scale(${scale})`,
-                      transformOrigin: "top left",
-                      imageRendering: "auto",
-                      textRendering: "optimizeLegibility",
-                    }}
-                    title="Website Preview"
-                    loading="eager"
-                    importance="high"
-                    onError={handleIframeError}
-                    onLoad={handleIframeLoad}
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  />
-                )}
-              </div>
+                </div>
+              ) : (
+                <iframe
+                  ref={iframeRef}
+                  src={proxyUrl}
+                  className="w-full h-full border-0"
+                  style={{
+                    width: currentWidth,
+                    height: currentHeight,
+                    transform: `scale(${scale})`,
+                    transformOrigin: "top left",
+                    imageRendering: "auto",
+                    textRendering: "optimizeLegibility",
+                  }}
+                  title="Website Preview"
+                  loading="eager"
+                  importance="high"
+                  onError={handleIframeError}
+                  onLoad={handleIframeLoad}
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                />
+              )}
             </div>
 
             {/* Professional Info Label */}
@@ -549,7 +499,11 @@ export default function Preview() {
         ) : (
           <div className="text-center">
             <div className="w-20 h-20 bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-6">
-              <Globe className="w-10 h-10 text-gray-400" />
+              <img
+                src="https://cdn.builder.io/api/v1/image/assets%2F2f9afe8dc22849b186c0fc07b1bbb4f9%2F5fe2031174b94cc7b66976474410e316?format=webp&width=800"
+                alt="RespoCheck"
+                className="w-10 h-10 object-contain"
+              />
             </div>
             <h3 className="text-xl font-semibold text-white mb-2">
               No Preview Available
