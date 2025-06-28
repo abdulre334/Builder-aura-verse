@@ -19,6 +19,9 @@ import {
   RotateCcw,
   ArrowLeft,
   Home,
+  Laptop,
+  Watch,
+  Tv,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -27,46 +30,127 @@ interface Device {
   name: string;
   width: number;
   height: number;
+  icon: React.ReactNode;
+  category: "desktop" | "tablet" | "mobile";
 }
 
-const devices = {
-  desktop: [
-    { id: "4k", name: "4K Ultra HD", width: 3840, height: 2160 },
-    { id: "2k", name: "2K QHD", width: 2560, height: 1440 },
-    { id: "fullhd", name: "Full HD", width: 1920, height: 1080 },
-    { id: "laptop", name: "MacBook Pro", width: 1440, height: 900 },
-    { id: "standard", name: "Standard HD", width: 1366, height: 768 },
-    { id: "old", name: "Old Monitor", width: 1024, height: 768 },
-  ],
-  tablet: [
-    { id: "ipad-pro", name: "iPad Pro 12.9", width: 1024, height: 1366 },
-    { id: "ipad-air", name: "iPad Air", width: 820, height: 1180 },
-    { id: "ipad", name: "iPad", width: 768, height: 1024 },
-    { id: "surface", name: "Surface Pro", width: 912, height: 1368 },
-    { id: "galaxy-tab", name: "Galaxy Tab", width: 800, height: 1280 },
-    { id: "kindle", name: "Kindle Fire", width: 1024, height: 600 },
-  ],
-  mobile: [
-    { id: "iphone-15-max", name: "iPhone 15 Pro Max", width: 430, height: 932 },
-    { id: "iphone-15", name: "iPhone 15", width: 393, height: 852 },
-    { id: "iphone-14", name: "iPhone 14", width: 390, height: 844 },
-    { id: "galaxy-s24", name: "Galaxy S24 Ultra", width: 412, height: 915 },
-    { id: "pixel-8", name: "Pixel 8 Pro", width: 412, height: 892 },
-    { id: "iphone-se", name: "iPhone SE", width: 375, height: 667 },
-  ],
-};
+const devices: Device[] = [
+  // Desktop & Monitors
+  {
+    id: "4k",
+    name: "4K Display",
+    width: 3840,
+    height: 2160,
+    icon: <Tv className="w-5 h-5" />,
+    category: "desktop",
+  },
+  {
+    id: "2k",
+    name: "2K Display",
+    width: 2560,
+    height: 1440,
+    icon: <Monitor className="w-5 h-5" />,
+    category: "desktop",
+  },
+  {
+    id: "fullhd",
+    name: "Full HD",
+    width: 1920,
+    height: 1080,
+    icon: <Monitor className="w-5 h-5" />,
+    category: "desktop",
+  },
+  {
+    id: "laptop",
+    name: "MacBook Pro",
+    width: 1440,
+    height: 900,
+    icon: <Laptop className="w-5 h-5" />,
+    category: "desktop",
+  },
+  {
+    id: "standard",
+    name: "Laptop",
+    width: 1366,
+    height: 768,
+    icon: <Laptop className="w-5 h-5" />,
+    category: "desktop",
+  },
 
-type DeviceCategory = "desktop" | "tablet" | "mobile";
+  // Tablets
+  {
+    id: "ipad-pro",
+    name: "iPad Pro",
+    width: 1024,
+    height: 1366,
+    icon: <Tablet className="w-5 h-5" />,
+    category: "tablet",
+  },
+  {
+    id: "ipad-air",
+    name: "iPad Air",
+    width: 820,
+    height: 1180,
+    icon: <Tablet className="w-5 h-5" />,
+    category: "tablet",
+  },
+  {
+    id: "ipad",
+    name: "iPad",
+    width: 768,
+    height: 1024,
+    icon: <Tablet className="w-5 h-5" />,
+    category: "tablet",
+  },
+
+  // Mobile Phones
+  {
+    id: "iphone-15-max",
+    name: "iPhone 15 Pro Max",
+    width: 430,
+    height: 932,
+    icon: <Smartphone className="w-5 h-5" />,
+    category: "mobile",
+  },
+  {
+    id: "iphone-15",
+    name: "iPhone 15",
+    width: 393,
+    height: 852,
+    icon: <Smartphone className="w-5 h-5" />,
+    category: "mobile",
+  },
+  {
+    id: "iphone-14",
+    name: "iPhone 14",
+    width: 390,
+    height: 844,
+    icon: <Smartphone className="w-5 h-5" />,
+    category: "mobile",
+  },
+  {
+    id: "galaxy-s24",
+    name: "Galaxy S24 Ultra",
+    width: 412,
+    height: 915,
+    icon: <Smartphone className="w-5 h-5" />,
+    category: "mobile",
+  },
+  {
+    id: "pixel-8",
+    name: "Pixel 8 Pro",
+    width: 412,
+    height: 892,
+    icon: <Smartphone className="w-5 h-5" />,
+    category: "mobile",
+  },
+];
 
 export default function Preview() {
   const [searchParams] = useSearchParams();
   const [currentUrl, setCurrentUrl] = useState("");
   const [proxyUrl, setProxyUrl] = useState("");
-  const [activeCategory, setActiveCategory] =
-    useState<DeviceCategory>("desktop");
-  const [selectedDevice, setSelectedDevice] = useState<Device>(
-    devices.desktop[2],
-  );
+  const [selectedDevice, setSelectedDevice] = useState<Device>(devices[2]);
   const [isLoading, setIsLoading] = useState(false);
   const [hasError, setHasError] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
@@ -74,20 +158,6 @@ export default function Preview() {
   const [zoomLevel, setZoomLevel] = useState("auto");
   const iframeRef = useRef<HTMLIFrameElement>(null);
 
-  // Calculate auto-fit zoom based on screen resolution
-  const calculateAutoFit = () => {
-    const screenWidth = window.innerWidth;
-    const screenHeight = window.innerHeight;
-    const availableWidth = screenWidth - 320 - 60; // sidebar width + padding
-    const availableHeight = screenHeight - 180; // header + padding
-
-    const scaleX = availableWidth / currentWidth;
-    const scaleY = availableHeight / currentHeight;
-
-    return Math.min(scaleX, scaleY, 2); // Max 200% zoom
-  };
-
-  // Enhanced zoom options with auto-fit
   const zoomOptions = [
     { value: "auto", label: "Auto Fit" },
     { value: "25", label: "25%" },
@@ -95,12 +165,9 @@ export default function Preview() {
     { value: "50", label: "50%" },
     { value: "67", label: "67%" },
     { value: "75", label: "75%" },
-    { value: "90", label: "90%" },
     { value: "100", label: "100%" },
-    { value: "110", label: "110%" },
     { value: "125", label: "125%" },
     { value: "150", label: "150%" },
-    { value: "175", label: "175%" },
     { value: "200", label: "200%" },
   ];
 
@@ -109,38 +176,41 @@ export default function Preview() {
     const width = searchParams.get("width");
     const height = searchParams.get("height");
     const deviceName = searchParams.get("device");
-    const category = searchParams.get("category") as DeviceCategory;
 
     if (url && width && height) {
       setCurrentUrl(url);
       const proxyUrlFormatted = `/api/proxy?url=${encodeURIComponent(url)}`;
       setProxyUrl(proxyUrlFormatted);
 
-      if (category) {
-        setActiveCategory(category);
-        const device = devices[category].find((d) => d.name === deviceName);
-        if (device) {
-          setSelectedDevice(device);
-        } else {
-          setSelectedDevice({
-            id: "custom",
-            name: `Custom (${width}×${height})`,
-            width: parseInt(width),
-            height: parseInt(height),
-          });
-        }
+      const device = devices.find((d) => d.name === deviceName);
+      if (device) {
+        setSelectedDevice(device);
+      } else {
+        setSelectedDevice({
+          id: "custom",
+          name: `Custom (${width}×${height})`,
+          width: parseInt(width),
+          height: parseInt(height),
+          icon: <Monitor className="w-5 h-5" />,
+          category: "desktop",
+        });
       }
-
-      // Set auto zoom by default
-      setZoomLevel("auto");
     }
   }, [searchParams]);
 
+  const calculateAutoFit = () => {
+    const availableWidth = window.innerWidth - 80;
+    const availableHeight = window.innerHeight - 120;
+
+    const scaleX = availableWidth / currentWidth;
+    const scaleY = availableHeight / currentHeight;
+
+    return Math.min(scaleX, scaleY, 1.5);
+  };
+
   const handleIframeError = () => {
     setHasError(true);
-    setErrorMessage(
-      "Failed to load website. The site might be temporarily unavailable.",
-    );
+    setErrorMessage("Failed to load website");
     setIsLoading(false);
   };
 
@@ -159,14 +229,9 @@ export default function Preview() {
     window.location.href = "/";
   };
 
-  const handleCategoryChange = (category: DeviceCategory) => {
-    setActiveCategory(category);
-    setSelectedDevice(devices[category][0]);
-    setIsRotated(false);
-  };
-
   const handleDeviceSelect = (device: Device) => {
     setSelectedDevice(device);
+    setIsRotated(false);
   };
 
   const toggleRotation = () => {
@@ -178,7 +243,6 @@ export default function Preview() {
     ? selectedDevice.width
     : selectedDevice.height;
 
-  // Calculate preview size with enhanced zoom
   const getPreviewDimensions = () => {
     let scale: number;
 
@@ -202,45 +266,69 @@ export default function Preview() {
   } = getPreviewDimensions();
 
   return (
-    <div className="min-h-screen bg-gray-50 flex overflow-hidden">
-      {/* Sidebar */}
-      <div className="w-80 bg-white border-r border-gray-200 flex flex-col overflow-hidden">
-        {/* Header */}
-        <div className="p-6 border-b border-gray-200 flex-shrink-0">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="p-2 bg-blue-500 rounded-lg">
-              <Globe className="w-5 h-5 text-white" />
-            </div>
-            <div>
-              <h1 className="font-bold text-gray-900">ResponsiveViewer</h1>
-              <p className="text-sm text-gray-600">Preview Mode</p>
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-slate-900 to-black overflow-hidden">
+      {/* Professional Header with Device Toolbar */}
+      <div className="bg-black/50 border-b border-gray-700/50 backdrop-blur-xl">
+        <div className="flex items-center justify-between px-6 py-3">
+          {/* Left Side - Logo & Back */}
+          <div className="flex items-center gap-6">
+            <Button
+              onClick={goHome}
+              variant="ghost"
+              size="sm"
+              className="text-gray-300 hover:text-white hover:bg-white/10"
+            >
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back
+            </Button>
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-blue-500 rounded-lg">
+                <Globe className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <h1 className="text-white font-semibold">ResponsiveViewer</h1>
+              </div>
             </div>
           </div>
-          <Button
-            onClick={goHome}
-            variant="outline"
-            size="sm"
-            className="w-full gap-2"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            Back to Home
-          </Button>
-        </div>
 
-        {/* Zoom Controls - Moved to Top */}
-        <div className="p-4 border-b border-gray-200 flex-shrink-0">
-          <div className="space-y-3">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Zoom Level
-              </label>
+          {/* Center - Device Toolbar */}
+          <div className="flex items-center gap-2 bg-gray-800/50 rounded-lg p-2">
+            {devices.map((device) => (
+              <Button
+                key={device.id}
+                onClick={() => handleDeviceSelect(device)}
+                variant="ghost"
+                size="sm"
+                className={cn(
+                  "flex flex-col items-center gap-1 h-auto p-3 text-xs transition-all",
+                  selectedDevice.id === device.id
+                    ? "bg-blue-500 text-white"
+                    : "text-gray-400 hover:text-white hover:bg-white/10",
+                )}
+                title={`${device.name} (${device.width}×${device.height})`}
+              >
+                {device.icon}
+                <span className="font-medium">{device.width}</span>
+              </Button>
+            ))}
+          </div>
+
+          {/* Right Side - Controls */}
+          <div className="flex items-center gap-4">
+            {/* Zoom Control */}
+            <div className="flex items-center gap-2">
+              <span className="text-gray-300 text-sm">Zoom:</span>
               <Select value={zoomLevel} onValueChange={setZoomLevel}>
-                <SelectTrigger className="w-full h-10">
+                <SelectTrigger className="w-24 h-8 bg-gray-800 border-gray-600 text-white">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-gray-800 border-gray-600">
                   {zoomOptions.map((option) => (
-                    <SelectItem key={option.value} value={option.value}>
+                    <SelectItem
+                      key={option.value}
+                      value={option.value}
+                      className="text-white hover:bg-gray-700"
+                    >
                       {option.label}
                     </SelectItem>
                   ))}
@@ -248,217 +336,194 @@ export default function Preview() {
               </Select>
             </div>
 
-            <div className="text-center">
-              <Badge variant="outline" className="font-mono text-xs">
-                {zoomLevel === "auto"
-                  ? `${Math.round(scale * 100)}%`
-                  : zoomLevel + "%"}
-              </Badge>
-            </div>
-          </div>
-        </div>
-
-        {/* Device Categories */}
-        <div className="flex-1 overflow-y-auto">
-          <div className="p-4">
-            <h3 className="font-medium text-gray-900 mb-3">
-              Device Categories
-            </h3>
-            <div className="space-y-2 mb-6">
-              <button
-                onClick={() => handleCategoryChange("desktop")}
-                className={cn(
-                  "w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition-colors",
-                  activeCategory === "desktop"
-                    ? "bg-blue-50 text-blue-700 border border-blue-200"
-                    : "text-gray-700 hover:bg-gray-50",
-                )}
-              >
-                <Monitor className="w-4 h-4" />
-                Desktop & Laptops
-              </button>
-              <button
-                onClick={() => handleCategoryChange("tablet")}
-                className={cn(
-                  "w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition-colors",
-                  activeCategory === "tablet"
-                    ? "bg-blue-50 text-blue-700 border border-blue-200"
-                    : "text-gray-700 hover:bg-gray-50",
-                )}
-              >
-                <Tablet className="w-4 h-4" />
-                Tablets
-              </button>
-              <button
-                onClick={() => handleCategoryChange("mobile")}
-                className={cn(
-                  "w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition-colors",
-                  activeCategory === "mobile"
-                    ? "bg-blue-50 text-blue-700 border border-blue-200"
-                    : "text-gray-700 hover:bg-gray-50",
-                )}
-              >
-                <Smartphone className="w-4 h-4" />
-                Mobile Phones
-              </button>
-            </div>
-
-            <h3 className="font-medium text-gray-900 mb-3">
-              {activeCategory === "desktop"
-                ? "Desktop & Laptops"
-                : activeCategory === "tablet"
-                  ? "Tablets"
-                  : "Mobile Phones"}
-            </h3>
-            <div className="space-y-2 mb-6">
-              {devices[activeCategory].map((device) => (
-                <button
-                  key={device.id}
-                  onClick={() => handleDeviceSelect(device)}
-                  className={cn(
-                    "w-full p-3 text-left border rounded-lg transition-all hover:border-blue-300 hover:bg-blue-50",
-                    selectedDevice.id === device.id
-                      ? "border-blue-500 bg-blue-50 text-blue-700"
-                      : "border-gray-200 text-gray-700",
-                  )}
-                >
-                  <div className="font-medium text-sm mb-1">{device.name}</div>
-                  <div className="text-xs text-gray-500">
-                    {device.width} × {device.height}px
-                  </div>
-                </button>
-              ))}
-            </div>
-
-            {/* Additional Controls */}
-            <div className="space-y-3 pt-4 border-t border-gray-200">
-              {(activeCategory === "tablet" || activeCategory === "mobile") && (
-                <Button
-                  onClick={toggleRotation}
-                  variant="outline"
-                  size="sm"
-                  className="w-full gap-2"
-                >
-                  <RotateCcw className="w-4 h-4" />
-                  {isRotated ? "Portrait" : "Landscape"}
-                </Button>
-              )}
-
+            {/* Rotation for mobile/tablet */}
+            {(selectedDevice.category === "tablet" ||
+              selectedDevice.category === "mobile") && (
               <Button
-                onClick={openInNewTab}
-                variant="outline"
+                onClick={toggleRotation}
+                variant="ghost"
                 size="sm"
-                className="w-full gap-2"
+                className="text-gray-300 hover:text-white hover:bg-white/10"
               >
-                <ExternalLink className="w-4 h-4" />
-                Open Original
+                <RotateCcw className="w-4 h-4" />
               </Button>
-            </div>
+            )}
+
+            <Button
+              onClick={openInNewTab}
+              variant="ghost"
+              size="sm"
+              className="text-gray-300 hover:text-white hover:bg-white/10"
+            >
+              <ExternalLink className="w-4 h-4" />
+            </Button>
           </div>
         </div>
 
-        {/* Footer Info */}
-        <div className="p-4 border-t border-gray-200 flex-shrink-0">
-          <div className="text-center">
-            <Badge variant="outline" className="font-mono mb-2">
-              {currentWidth} × {currentHeight}px
-            </Badge>
-            <p className="text-xs text-gray-500">Current Resolution</p>
+        {/* Device Info Bar */}
+        <div className="px-6 py-2 bg-gray-800/30 border-t border-gray-700/30">
+          <div className="flex items-center justify-between text-sm">
+            <div className="flex items-center gap-4 text-gray-300">
+              <span className="font-medium text-white">
+                {selectedDevice.name}
+              </span>
+              <Badge
+                variant="outline"
+                className="border-gray-600 text-gray-300"
+              >
+                {currentWidth} × {currentHeight}px
+              </Badge>
+              <span>
+                {Math.round(scale * 100)}% •{" "}
+                {currentUrl && new URL(currentUrl).hostname}
+              </span>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Main Preview Area */}
-      <div className="flex-1 flex flex-col overflow-hidden">
-        {/* Top Bar */}
-        <div className="bg-white border-b border-gray-200 p-4 flex-shrink-0">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <h2 className="font-medium text-gray-900">
-                {selectedDevice.name}
-              </h2>
-              <Badge variant="outline">{activeCategory}</Badge>
-            </div>
-            <div className="text-sm text-gray-500">
-              {currentUrl && new URL(currentUrl).hostname}
-            </div>
-          </div>
-        </div>
-
-        {/* Preview Area - No Scroll Bars */}
-        <div className="flex-1 flex items-center justify-center p-8 bg-gray-100 overflow-hidden">
-          {proxyUrl ? (
+      {/* Professional Preview Area with Grid Background */}
+      <div
+        className="flex-1 flex items-center justify-center p-8 relative overflow-hidden"
+        style={{
+          backgroundImage: `
+            linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px)
+          `,
+          backgroundSize: "20px 20px",
+        }}
+      >
+        {proxyUrl ? (
+          <div className="relative">
+            {/* Realistic Device Frame */}
             <div
-              className="bg-white shadow-xl overflow-hidden border border-gray-300"
+              className={cn(
+                "relative overflow-hidden shadow-2xl",
+                selectedDevice.category === "mobile" &&
+                  "bg-gray-900 rounded-[2.5rem] p-4",
+                selectedDevice.category === "tablet" &&
+                  "bg-gray-800 rounded-2xl p-3",
+                selectedDevice.category === "desktop" &&
+                  "bg-gray-700 rounded-lg",
+              )}
               style={{
-                width: previewWidth,
-                height: previewHeight,
-                maxWidth: "100%",
-                maxHeight: "100%",
+                width:
+                  selectedDevice.category === "desktop"
+                    ? previewWidth + 20
+                    : previewWidth + 40,
+                height:
+                  selectedDevice.category === "desktop"
+                    ? previewHeight + 20
+                    : previewHeight + 50,
               }}
             >
-              {isLoading ? (
-                <div className="w-full h-full flex items-center justify-center bg-gray-50">
-                  <div className="text-center">
-                    <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-                    <p className="text-gray-600 font-medium">
-                      Loading preview...
-                    </p>
-                  </div>
-                </div>
-              ) : hasError ? (
-                <div className="w-full h-full flex items-center justify-center bg-red-50">
-                  <div className="text-center p-8">
-                    <AlertCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
-                    <h3 className="text-lg font-semibold text-gray-800 mb-2">
-                      Cannot Load Website
-                    </h3>
-                    <p className="text-gray-600 mb-4">
-                      {errorMessage || "Failed to load website content"}
-                    </p>
-                    <Button onClick={openInNewTab} size="sm">
-                      <ExternalLink className="w-4 h-4 mr-2" />
-                      Open Original
-                    </Button>
-                  </div>
-                </div>
-              ) : (
-                <iframe
-                  ref={iframeRef}
-                  src={proxyUrl}
-                  className="w-full h-full"
-                  style={{
-                    width: currentWidth,
-                    height: currentHeight,
-                    transform: `scale(${scale})`,
-                    transformOrigin: "top left",
-                    border: "none",
-                    overflow: "hidden",
-                  }}
-                  title="Website Preview"
-                  onError={handleIframeError}
-                  onLoad={handleIframeLoad}
-                />
+              {/* Mobile Device Details */}
+              {selectedDevice.category === "mobile" && (
+                <>
+                  {/* Dynamic Island / Notch */}
+                  <div className="absolute top-2 left-1/2 transform -translate-x-1/2 w-24 h-2 bg-black rounded-full z-20"></div>
+                  {/* Home Indicator */}
+                  <div className="absolute bottom-1 left-1/2 transform -translate-x-1/2 w-16 h-1 bg-gray-600 rounded-full z-20"></div>
+                  {/* Power Button */}
+                  <div className="absolute -right-1 top-24 w-1 h-12 bg-gray-600 rounded-l"></div>
+                  {/* Volume Buttons */}
+                  <div className="absolute -left-1 top-20 w-1 h-8 bg-gray-600 rounded-r"></div>
+                  <div className="absolute -left-1 top-32 w-1 h-8 bg-gray-600 rounded-r"></div>
+                </>
               )}
-            </div>
-          ) : (
-            <div className="text-center">
-              <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Globe className="w-8 h-8 text-gray-400" />
+
+              {/* Tablet Device Details */}
+              {selectedDevice.category === "tablet" && (
+                <>
+                  <div className="absolute bottom-1 left-1/2 transform -translate-x-1/2 w-12 h-12 border-2 border-gray-600 rounded-full bg-gray-800"></div>
+                </>
+              )}
+
+              {/* Preview Content */}
+              <div
+                className={cn(
+                  "bg-white overflow-hidden relative",
+                  selectedDevice.category === "mobile" && "rounded-3xl m-3",
+                  selectedDevice.category === "tablet" && "rounded-xl m-2",
+                  selectedDevice.category === "desktop" && "rounded m-2",
+                )}
+                style={{
+                  width: previewWidth,
+                  height: previewHeight,
+                }}
+              >
+                {isLoading ? (
+                  <div className="w-full h-full flex items-center justify-center bg-gray-100">
+                    <div className="text-center">
+                      <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                      <p className="text-gray-600 font-medium">
+                        Loading preview...
+                      </p>
+                    </div>
+                  </div>
+                ) : hasError ? (
+                  <div className="w-full h-full flex items-center justify-center bg-red-50">
+                    <div className="text-center p-8">
+                      <AlertCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
+                      <h3 className="text-lg font-semibold text-gray-800 mb-2">
+                        Cannot Load Website
+                      </h3>
+                      <p className="text-gray-600 mb-4">{errorMessage}</p>
+                      <Button onClick={openInNewTab} size="sm">
+                        <ExternalLink className="w-4 h-4 mr-2" />
+                        Open Original
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <iframe
+                    ref={iframeRef}
+                    src={proxyUrl}
+                    className="w-full h-full border-0"
+                    style={{
+                      width: currentWidth,
+                      height: currentHeight,
+                      transform: `scale(${scale})`,
+                      transformOrigin: "top left",
+                    }}
+                    title="Website Preview"
+                    onError={handleIframeError}
+                    onLoad={handleIframeLoad}
+                  />
+                )}
               </div>
-              <h3 className="text-lg font-semibold text-gray-800 mb-2">
-                No Preview Available
-              </h3>
-              <p className="text-gray-600">
-                Please return to home to enter a website URL.
-              </p>
-              <Button onClick={goHome} className="mt-4">
-                <Home className="w-4 h-4 mr-2" />
-                Go to Home
-              </Button>
             </div>
-          )}
-        </div>
+
+            {/* Professional Info Label */}
+            <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2">
+              <div className="bg-black/80 backdrop-blur-sm rounded-lg px-4 py-2 text-center">
+                <div className="text-white text-sm font-medium">
+                  {selectedDevice.name}
+                </div>
+                <div className="text-gray-300 text-xs">
+                  {currentWidth} × {currentHeight}px • {Math.round(scale * 100)}
+                  %
+                </div>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className="text-center">
+            <div className="w-20 h-20 bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-6">
+              <Globe className="w-10 h-10 text-gray-400" />
+            </div>
+            <h3 className="text-xl font-semibold text-white mb-2">
+              No Preview Available
+            </h3>
+            <p className="text-gray-400 mb-6">
+              Please return to home to enter a website URL.
+            </p>
+            <Button onClick={goHome} className="bg-blue-500 hover:bg-blue-600">
+              <Home className="w-4 h-4 mr-2" />
+              Go to Home
+            </Button>
+          </div>
+        )}
       </div>
     </div>
   );
