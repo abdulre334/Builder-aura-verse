@@ -1,24 +1,25 @@
 {
   "name": "RespoCheck - Professional Responsive Website Testing Tool",
   "short_name": "RespoCheck",
-  "description": "Test how your website looks on different devices and screen sizes with professional responsive design checker",
+  "description": "Test how your website looks on different devices and screen sizes with real-time crawling and live previews",
   "icons": [
     {
-      "src": "https://cdn.builder.io/api/v1/image/assets%2F2f9afe8dc22849b186c0fc07b1bbb4f9%2F5fe2031174b94cc7b66976474410e316?format=webp&width=192",
+      "src": "https://cdn.builder.io/api/v1/image/assets%2F2f9afe8dc22849b186c0fc07b1bbb4f9%2F2f9de9187e1c4134988baa17156cc2c7?format=webp&width=192",
       "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "https://cdn.builder.io/api/v1/image/assets%2F2f9afe8dc22849b186c0fc07b1bbb4f9%2F5fe2031174b94cc7b66976474410e316?format=webp&width=512",
+      "src": "https://cdn.builder.io/api/v1/image/assets%2F2f9afe8dc22849b186c0fc07b1bbb4f9%2F2f9de9187e1c4134988baa17156cc2c7?format=webp&width=512",
       "sizes": "512x512",
       "type": "image/png"
     }
   ],
   "theme_color": "#3B82F6",
-  "background_color": "#ffffff",
+  "background_color": "#f8fafc",
   "display": "standalone",
   "start_url": "/",
   "scope": "/",
-  "categories": ["developer", "design", "tools"],
-  "lang": "en"
+  "categories": ["developer", "design", "tools", "responsive", "testing"],
+  "lang": "en",
+  "orientation": "any"
 }
