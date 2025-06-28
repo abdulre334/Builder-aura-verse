@@ -245,14 +245,18 @@ export default function Index() {
         <div className="p-4 border-b border-slate-200 bg-gradient-to-r from-blue-50 to-indigo-50">
           <div className="flex items-center justify-between">
             {!sidebarCollapsed && (
-              <div className="flex items-center gap-3">
+              <a
+                href="https://respocheck.vercel.app"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-center flex-1"
+              >
                 <img
                   src="https://cdn.builder.io/api/v1/image/assets%2F2f9afe8dc22849b186c0fc07b1bbb4f9%2F2f9de9187e1c4134988baa17156cc2c7?format=webp&width=800"
-                  alt="RespoCheck"
-                  className="w-8 h-8 object-contain"
+                  alt="Website Logo"
+                  className="w-16 h-16 object-contain hover:scale-105 transition-transform cursor-pointer"
                 />
-                <h1 className="text-lg font-bold text-blue-700">RespoCheck</h1>
-              </div>
+              </a>
             )}
             <Button
               variant="ghost"
