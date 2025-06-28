@@ -543,78 +543,138 @@ export default function Index() {
         </div>
 
         {/* Preview Area */}
-        <div className="flex-1 bg-slate-100 p-4 overflow-auto">
+        <div
+          className="flex-1 p-4 overflow-auto transition-all duration-500"
+          style={{
+            background: proxyUrl
+              ? `linear-gradient(135deg,
+                   rgba(29, 78, 216, 0.08) 0%,
+                   rgba(59, 130, 246, 0.06) 25%,
+                   rgba(99, 102, 241, 0.08) 50%,
+                   rgba(147, 197, 253, 0.06) 75%,
+                   rgba(29, 78, 216, 0.08) 100%)`
+              : `linear-gradient(135deg,
+                   rgba(29, 78, 216, 0.12) 0%,
+                   rgba(59, 130, 246, 0.1) 25%,
+                   rgba(99, 102, 241, 0.12) 50%,
+                   rgba(147, 197, 253, 0.1) 75%,
+                   rgba(29, 78, 216, 0.12) 100%)`,
+          }}
+        >
           {proxyUrl ? (
             <div className="flex justify-center items-start min-h-full">
-              <div
-                className="bg-white shadow-lg rounded-lg overflow-hidden"
-                style={{
-                  width: Math.min(
-                    previewWidth,
-                    window.innerWidth - (sidebarCollapsed ? 120 : 360),
-                  ),
-                  height: Math.min(previewHeight, window.innerHeight - 180),
-                }}
-              >
-                {isLoading ? (
-                  <div className="w-full h-full flex items-center justify-center bg-slate-50">
-                    <div className="text-center">
-                      <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-3"></div>
-                      <p className="text-blue-700 font-medium">
-                        Real-time crawling...
-                      </p>
-                      <p className="text-slate-500 text-sm">
-                        Loading all resources
-                      </p>
-                    </div>
-                  </div>
-                ) : hasError ? (
-                  <div className="w-full h-full flex items-center justify-center bg-red-50">
-                    <div className="text-center p-6">
-                      <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-3" />
-                      <h3 className="text-lg font-medium text-slate-800 mb-2">
-                        Loading Failed
-                      </h3>
-                      <p className="text-slate-600 mb-4 text-sm">
-                        {errorMessage || "Failed to load website"}
-                      </p>
-                      <div className="flex gap-2 justify-center">
-                        <Button
-                          onClick={handlePreview}
-                          variant="outline"
-                          size="sm"
-                        >
-                          Retry
-                        </Button>
-                        <Button onClick={openInNewTab} size="sm">
-                          Open Original
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                ) : (
-                  <iframe
-                    ref={iframeRef}
-                    src={proxyUrl}
-                    className="w-full h-full border-0"
+              {/* Device Frame */}
+              <div className="relative">
+                {/* Device Frame Border */}
+                <div
+                  className="bg-slate-800 rounded-xl p-1 shadow-2xl"
+                  style={{
+                    width: Math.min(
+                      previewWidth + 8,
+                      window.innerWidth - (sidebarCollapsed ? 120 : 360),
+                    ),
+                    height: Math.min(
+                      previewHeight + 8,
+                      window.innerHeight - 180,
+                    ),
+                  }}
+                >
+                  {/* Device Screen */}
+                  <div
+                    className="bg-white rounded-lg overflow-hidden relative"
                     style={{
-                      width: currentWidth,
-                      height: currentHeight,
-                      transform: `scale(${scale})`,
-                      transformOrigin: "top left",
+                      width: Math.min(
+                        previewWidth,
+                        window.innerWidth - (sidebarCollapsed ? 128 : 368),
+                      ),
+                      height: Math.min(previewHeight, window.innerHeight - 188),
                     }}
-                    title="Website Preview"
-                    onError={handleIframeError}
-                    onLoad={handleIframeLoad}
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                  />
-                )}
+                  >
+                    {isLoading ? (
+                      <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-50">
+                        <div className="text-center">
+                          <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-3"></div>
+                          <p className="text-blue-700 font-medium">
+                            Real-time crawling...
+                          </p>
+                          <p className="text-slate-500 text-sm">
+                            Full page rendering
+                          </p>
+                        </div>
+                      </div>
+                    ) : hasError ? (
+                      <div className="w-full h-full flex items-center justify-center bg-red-50">
+                        <div className="text-center p-6">
+                          <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-3" />
+                          <h3 className="text-lg font-medium text-slate-800 mb-2">
+                            Loading Failed
+                          </h3>
+                          <p className="text-slate-600 mb-4 text-sm">
+                            {errorMessage || "Failed to load website"}
+                          </p>
+                          <div className="flex gap-2 justify-center">
+                            <Button
+                              onClick={handlePreview}
+                              variant="outline"
+                              size="sm"
+                            >
+                              Retry
+                            </Button>
+                            <Button onClick={openInNewTab} size="sm">
+                              Open Original
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    ) : (
+                      <>
+                        {/* Viewport Simulation - Real Responsive Testing */}
+                        <iframe
+                          ref={iframeRef}
+                          src={proxyUrl}
+                          className="w-full h-full border-0"
+                          style={{
+                            width: currentWidth,
+                            height: currentHeight,
+                            transform: `scale(${scale})`,
+                            transformOrigin: "top left",
+                            minHeight: currentHeight,
+                            backgroundColor: "#ffffff",
+                          }}
+                          title={`${selectedDevice.name} Viewport - ${currentWidth}x${currentHeight}`}
+                          onError={handleIframeError}
+                          onLoad={handleIframeLoad}
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                          sandbox="allow-scripts allow-same-origin allow-popups allow-forms allow-downloads"
+                        />
+
+                        {/* Device Info Overlay */}
+                        <div className="absolute top-2 right-2 bg-black/75 text-white text-xs px-2 py-1 rounded backdrop-blur-sm">
+                          {currentWidth} × {currentHeight}px
+                        </div>
+                      </>
+                    )}
+                  </div>
+                </div>
+
+                {/* Device Name Label */}
+                <div className="text-center mt-3">
+                  <div className="inline-flex items-center gap-2 bg-white/90 backdrop-blur-sm rounded-lg px-3 py-1 shadow-lg border border-blue-200">
+                    <span className="text-slate-700 font-medium text-sm">
+                      {selectedDevice.name}
+                    </span>
+                    <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                    <span className="text-green-600 text-xs font-medium">
+                      Live
+                    </span>
+                  </div>
+                </div>
               </div>
             </div>
           ) : (
             <div className="flex items-center justify-center h-full">
               <div className="text-center">
-                <div className="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <div className="w-20 h-20 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
                   <img
                     src="https://cdn.builder.io/api/v1/image/assets%2F2f9afe8dc22849b186c0fc07b1bbb4f9%2F2f9de9187e1c4134988baa17156cc2c7?format=webp&width=800"
                     alt="RespoCheck"
@@ -625,9 +685,23 @@ export default function Index() {
                   Real-Time Responsive Testing
                 </h2>
                 <p className="text-slate-600 max-w-md mx-auto">
-                  Enter a website URL in the sidebar to see live previews across
-                  different devices and screen sizes.
+                  Enter a website URL in the sidebar to see full page rendering
+                  with proper viewport simulation across different devices.
                 </p>
+                <div className="mt-6 grid grid-cols-3 gap-4 max-w-sm mx-auto text-xs text-slate-500">
+                  <div className="text-center">
+                    <div className="w-8 h-8 bg-blue-100 rounded-lg mx-auto mb-1"></div>
+                    Full Page Rendering
+                  </div>
+                  <div className="text-center">
+                    <div className="w-8 h-8 bg-indigo-100 rounded-lg mx-auto mb-1"></div>
+                    Viewport Simulation
+                  </div>
+                  <div className="text-center">
+                    <div className="w-8 h-8 bg-blue-100 rounded-lg mx-auto mb-1"></div>
+                    No Cropping
+                  </div>
+                </div>
               </div>
             </div>
           )}
