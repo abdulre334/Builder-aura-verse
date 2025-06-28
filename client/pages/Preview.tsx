@@ -199,13 +199,15 @@ export default function Preview() {
   }, [searchParams]);
 
   const calculateAutoFit = () => {
-    const availableWidth = window.innerWidth - 80;
-    const availableHeight = window.innerHeight - 120;
+    // Better calculation for preview area
+    const availableWidth = window.innerWidth - 100; // More precise margins
+    const availableHeight = window.innerHeight - 140; // Account for headers
 
     const scaleX = availableWidth / currentWidth;
     const scaleY = availableHeight / currentHeight;
 
-    return Math.min(scaleX, scaleY, 1.5);
+    // Allow larger scaling for better preview quality
+    return Math.min(scaleX, scaleY, 2.0); // Up to 200% for better quality
   };
 
   const handleIframeError = () => {
