@@ -173,14 +173,15 @@ export default function Index() {
     setUseCustomSize(false);
 
     // Auto-reload when switching devices
-    if (proxyUrl) {
+    if (currentUrl) {
       setIsLoading(true);
       setHasError(false);
+      const freshProxyUrl = `/api/proxy?url=${encodeURIComponent(currentUrl)}&t=${Date.now()}`;
+      setProxyUrl(freshProxyUrl);
       setTimeout(() => {
-        if (iframeRef.current) {
-          iframeRef.current.src = iframeRef.current.src;
-        }
-      }, 100);
+        setIsLoading(false);
+        setHasError(false);
+      }, 1500);
     }
   };
 
