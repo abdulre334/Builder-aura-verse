@@ -189,14 +189,15 @@ export default function Index() {
     setIsRotated(!isRotated);
 
     // Auto-reload when rotating
-    if (proxyUrl) {
+    if (currentUrl) {
       setIsLoading(true);
       setHasError(false);
+      const freshProxyUrl = `/api/proxy?url=${encodeURIComponent(currentUrl)}&t=${Date.now()}`;
+      setProxyUrl(freshProxyUrl);
       setTimeout(() => {
-        if (iframeRef.current) {
-          iframeRef.current.src = iframeRef.current.src;
-        }
-      }, 50);
+        setIsLoading(false);
+        setHasError(false);
+      }, 1500);
     }
   };
 
@@ -204,14 +205,15 @@ export default function Index() {
     setUseCustomSize(true);
 
     // Auto-reload when using custom size
-    if (proxyUrl) {
+    if (currentUrl) {
       setIsLoading(true);
       setHasError(false);
+      const freshProxyUrl = `/api/proxy?url=${encodeURIComponent(currentUrl)}&t=${Date.now()}`;
+      setProxyUrl(freshProxyUrl);
       setTimeout(() => {
-        if (iframeRef.current) {
-          iframeRef.current.src = iframeRef.current.src;
-        }
-      }, 100);
+        setIsLoading(false);
+        setHasError(false);
+      }, 1500);
     }
   };
 
