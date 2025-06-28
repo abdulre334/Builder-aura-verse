@@ -137,21 +137,73 @@ export default function Index() {
   };
 
   const handleIframeLoad = () => {
-    // Enhanced loading to ensure all resources are loaded
+    // Real-time website crawling and loading
     const iframe = iframeRef.current;
     if (iframe && iframe.contentWindow) {
       try {
         const iframeDoc =
           iframe.contentDocument || iframe.contentWindow.document;
 
-        // Wait for complete document loading including all resources
+        // Ensure complete real-time loading of all resources
         const checkComplete = () => {
           if (iframeDoc.readyState === "complete") {
-            // Additional wait for fonts, images, and CSS to render
-            setTimeout(() => {
-              setIsLoading(false);
-              setHasError(false);
-            }, 3000); // Longer wait for complete rendering
+            // Force reload all dynamic content and ensure real-time rendering
+            const checkResources = () => {
+              const images = iframeDoc.querySelectorAll("img");
+              const scripts = iframeDoc.querySelectorAll("script");
+              const styles = iframeDoc.querySelectorAll(
+                "link[rel='stylesheet']",
+              );
+
+              let loadedCount = 0;
+              const totalResources =
+                images.length + scripts.length + styles.length;
+
+              if (totalResources === 0) {
+                setTimeout(() => {
+                  setIsLoading(false);
+                  setHasError(false);
+                }, 2000);
+                return;
+              }
+
+              const checkResourceLoad = () => {
+                loadedCount++;
+                if (loadedCount >= totalResources) {
+                  setTimeout(() => {
+                    setIsLoading(false);
+                    setHasError(false);
+                  }, 1500);
+                }
+              };
+
+              // Check all images
+              images.forEach((img) => {
+                if (img.complete) {
+                  checkResourceLoad();
+                } else {
+                  img.addEventListener("load", checkResourceLoad);
+                  img.addEventListener("error", checkResourceLoad);
+                }
+              });
+
+              // Check stylesheets
+              styles.forEach((style) => {
+                if (style.sheet) {
+                  checkResourceLoad();
+                } else {
+                  style.addEventListener("load", checkResourceLoad);
+                  style.addEventListener("error", checkResourceLoad);
+                }
+              });
+
+              // Scripts are already loaded if we reach here
+              for (let i = 0; i < scripts.length; i++) {
+                checkResourceLoad();
+              }
+            };
+
+            setTimeout(checkResources, 1000);
           } else {
             setTimeout(checkComplete, 500);
           }
@@ -159,7 +211,7 @@ export default function Index() {
 
         checkComplete();
       } catch (e) {
-        // Cross-origin restrictions, wait longer
+        // Cross-origin, wait for real-time loading
         setTimeout(() => {
           setIsLoading(false);
           setHasError(false);
@@ -255,61 +307,106 @@ export default function Index() {
   } = getPreviewDimensions();
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Clean Header with RespoCheck Branding */}
-      <div className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-6 py-4">
-          <div className="flex items-center gap-4">
-            {/* RespoCheck Logo */}
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+      {/* Enhanced Header with Animated Logo */}
+      <style jsx>{`
+        @keyframes logoFloat {
+          0%,
+          100% {
+            transform: translateY(0px) rotate(0deg);
+          }
+          50% {
+            transform: translateY(-10px) rotate(5deg);
+          }
+        }
+        @keyframes logoPulse {
+          0%,
+          100% {
+            transform: scale(1);
+          }
+          50% {
+            transform: scale(1.05);
+          }
+        }
+        @keyframes logoGlow {
+          0%,
+          100% {
+            filter: drop-shadow(0 0 10px rgba(59, 130, 246, 0.3));
+          }
+          50% {
+            filter: drop-shadow(0 0 20px rgba(59, 130, 246, 0.6));
+          }
+        }
+        .logo-animated {
+          animation:
+            logoFloat 3s ease-in-out infinite,
+            logoPulse 2s ease-in-out infinite,
+            logoGlow 4s ease-in-out infinite;
+        }
+        @media (max-width: 768px) {
+          .responsive-container {
+            padding: 16px;
+          }
+          .responsive-grid {
+            grid-template-columns: 1fr;
+          }
+          .responsive-flex {
+            flex-direction: column;
+            gap: 12px;
+          }
+          .responsive-text {
+            font-size: 14px;
+          }
+        }
+      `}</style>
+
+      <div className="bg-white/90 backdrop-blur-sm border-b border-slate-200/50 shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 responsive-container">
+          <div className="flex justify-center">
+            {/* Large Animated Logo Only */}
             <div className="relative">
               <img
-                src="https://cdn.builder.io/api/v1/image/assets%2F2f9afe8dc22849b186c0fc07b1bbb4f9%2F5fe2031174b94cc7b66976474410e316?format=webp&width=800"
-                alt="RespoCheck Logo"
-                className="w-12 h-12 object-contain"
+                src="https://cdn.builder.io/api/v1/image/assets%2F2f9afe8dc22849b186c0fc07b1bbb4f9%2F2f9de9187e1c4134988baa17156cc2c7?format=webp&width=800"
+                alt="RespoCheck"
+                className="w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 lg:w-32 lg:h-32 object-contain logo-animated"
               />
-            </div>
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">RespoCheck</h1>
-              <p className="text-sm text-gray-600">
-                Professional responsive design testing tool
-              </p>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Main Content */}
-      <div className="max-w-7xl mx-auto p-6">
-        {/* URL Input */}
-        <div className="bg-white rounded-lg shadow-sm border p-6 mb-6">
-          <div className="flex gap-4">
+      {/* Main Content - Fully Responsive */}
+      <div className="max-w-7xl mx-auto p-4 sm:p-6 responsive-container">
+        {/* URL Input - Enhanced */}
+        <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg border border-slate-200/50 p-4 sm:p-6 mb-6">
+          <div className="flex flex-col sm:flex-row gap-4 responsive-flex">
             <Input
               type="url"
               placeholder="Enter website URL (e.g., https://example.com)"
               value={url}
               onChange={(e) => setUrl(e.target.value)}
               onKeyPress={handleKeyPress}
-              className="flex-1 h-12 text-base"
+              className="flex-1 h-12 sm:h-14 text-base bg-white/90 border-slate-300 focus:border-blue-500 focus:ring-blue-500/20"
             />
             <Button
               onClick={handlePreview}
               disabled={!url.trim() || isLoading}
-              className="h-12 px-8 bg-blue-500 hover:bg-blue-600 text-base font-medium"
+              className="h-12 sm:h-14 px-6 sm:px-8 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white font-medium text-base shadow-lg"
             >
               {isLoading ? "Loading..." : "Check Responsiveness"}
             </Button>
           </div>
         </div>
 
-        {/* Device Categories */}
-        <div className="bg-white rounded-lg shadow-sm border mb-6">
-          {/* Category Tabs */}
+        {/* Device Categories - Enhanced Responsive */}
+        <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg border border-slate-200/50 mb-6">
+          {/* Category Tabs - Responsive */}
           <div className="border-b border-gray-200">
-            <div className="flex">
+            <div className="flex flex-col sm:flex-row">
               <button
                 onClick={() => handleCategoryChange("desktop")}
                 className={cn(
-                  "flex items-center gap-3 px-8 py-4 border-b-2 font-medium text-base transition-colors",
+                  "flex items-center justify-center sm:justify-start gap-3 px-4 sm:px-8 py-4 border-b-2 font-medium text-sm sm:text-base transition-colors responsive-text",
                   activeCategory === "desktop"
                     ? "border-blue-500 text-blue-600 bg-blue-50"
                     : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300",
@@ -321,7 +418,7 @@ export default function Index() {
               <button
                 onClick={() => handleCategoryChange("tablet")}
                 className={cn(
-                  "flex items-center gap-3 px-8 py-4 border-b-2 font-medium text-base transition-colors",
+                  "flex items-center justify-center sm:justify-start gap-3 px-4 sm:px-8 py-4 border-b-2 font-medium text-sm sm:text-base transition-colors responsive-text",
                   activeCategory === "tablet"
                     ? "border-blue-500 text-blue-600 bg-blue-50"
                     : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300",
@@ -333,7 +430,7 @@ export default function Index() {
               <button
                 onClick={() => handleCategoryChange("mobile")}
                 className={cn(
-                  "flex items-center gap-3 px-8 py-4 border-b-2 font-medium text-base transition-colors",
+                  "flex items-center justify-center sm:justify-start gap-3 px-4 sm:px-8 py-4 border-b-2 font-medium text-sm sm:text-base transition-colors responsive-text",
                   activeCategory === "mobile"
                     ? "border-blue-500 text-blue-600 bg-blue-50"
                     : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300",
@@ -345,15 +442,15 @@ export default function Index() {
             </div>
           </div>
 
-          {/* Device Options */}
-          <div className="p-6">
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 mb-6">
+          {/* Device Options - Responsive Grid */}
+          <div className="p-4 sm:p-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 mb-6 responsive-grid">
               {devices[activeCategory].map((device) => (
                 <button
                   key={device.id}
                   onClick={() => handleDeviceSelect(device)}
                   className={cn(
-                    "p-4 text-left border rounded-lg transition-all hover:border-blue-300 hover:bg-blue-50",
+                    "p-3 sm:p-4 text-left border rounded-lg transition-all hover:border-blue-300 hover:bg-blue-50",
                     selectedDevice.id === device.id && !useCustomSize
                       ? "border-blue-500 bg-blue-50 text-blue-700"
                       : "border-gray-200 text-gray-700",
@@ -367,15 +464,15 @@ export default function Index() {
               ))}
             </div>
 
-            {/* Custom Size Controls */}
+            {/* Custom Size Controls - Responsive */}
             <div className="border-t pt-6">
               <div className="flex items-center gap-3 mb-4">
                 <Settings className="w-5 h-5 text-gray-600" />
-                <span className="font-medium text-gray-700">
+                <span className="font-medium text-gray-700 text-sm sm:text-base">
                   Custom Size Controls
                 </span>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-3">
                     Width: {customWidth}px
@@ -421,14 +518,14 @@ export default function Index() {
           </div>
         </div>
 
-        {/* Preview Controls */}
+        {/* Preview Controls - Responsive */}
         {proxyUrl && (
-          <div className="bg-white rounded-lg shadow-sm border p-4 mb-6">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4">
+          <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg border border-slate-200/50 p-4 mb-6">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div className="flex flex-wrap items-center gap-3">
                 <Badge
                   variant="outline"
-                  className="text-base px-4 py-2 font-mono"
+                  className="text-sm sm:text-base px-3 sm:px-4 py-1 sm:py-2 font-mono"
                 >
                   {currentWidth} × {currentHeight}px
                 </Badge>
@@ -438,12 +535,12 @@ export default function Index() {
                   </Badge>
                 )}
               </div>
-              <div className="flex items-center gap-3">
+              <div className="flex flex-wrap items-center gap-2 sm:gap-3">
                 {/* Zoom Control */}
                 <div className="flex items-center gap-2">
                   <span className="text-sm text-gray-600">Zoom:</span>
                   <Select value={zoomLevel} onValueChange={setZoomLevel}>
-                    <SelectTrigger className="w-32">
+                    <SelectTrigger className="w-24 sm:w-32">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -465,7 +562,9 @@ export default function Index() {
                     className="gap-2"
                   >
                     <RotateCcw className="w-4 h-4" />
-                    {isRotated ? "Portrait" : "Landscape"}
+                    <span className="hidden sm:inline">
+                      {isRotated ? "Portrait" : "Landscape"}
+                    </span>
                   </Button>
                 )}
 
@@ -476,7 +575,7 @@ export default function Index() {
                   className="gap-2"
                 >
                   <Maximize2 className="w-4 h-4" />
-                  Preview Mode
+                  <span className="hidden sm:inline">Preview Mode</span>
                 </Button>
 
                 <Button
@@ -486,47 +585,47 @@ export default function Index() {
                   className="gap-2"
                 >
                   <ExternalLink className="w-4 h-4" />
-                  Open Original
+                  <span className="hidden sm:inline">Open Original</span>
                 </Button>
               </div>
             </div>
           </div>
         )}
 
-        {/* Clean Preview - NO BORDERS for mobile/tablet */}
+        {/* Clean Preview - Enhanced */}
         {proxyUrl && (
-          <div className="bg-white rounded-lg shadow-sm border p-6">
+          <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg border border-slate-200/50 p-4 sm:p-6">
             <div className="flex justify-center">
               <div
-                className="bg-white shadow-xl overflow-hidden"
+                className="bg-white shadow-2xl overflow-hidden rounded-lg"
                 style={{
-                  width: previewWidth,
-                  height: previewHeight,
+                  width: Math.min(previewWidth, window.innerWidth - 80),
+                  height: Math.min(previewHeight, window.innerHeight - 200),
                 }}
               >
                 {isLoading ? (
                   <div className="w-full h-full flex items-center justify-center bg-gray-100">
                     <div className="text-center">
                       <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-                      <p className="text-gray-600 font-medium text-lg">
-                        Loading website resources...
+                      <p className="text-gray-600 font-medium text-base sm:text-lg">
+                        Real-time crawling...
                       </p>
                       <p className="text-gray-500 text-sm mt-2">
-                        Fetching fonts, images, and styles
+                        Loading all resources in real-time
                       </p>
                     </div>
                   </div>
                 ) : hasError ? (
                   <div className="w-full h-full flex items-center justify-center bg-red-50">
-                    <div className="text-center p-8">
-                      <AlertCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
-                      <h3 className="text-lg font-semibold text-gray-800 mb-2">
+                    <div className="text-center p-4 sm:p-8">
+                      <AlertCircle className="w-12 sm:w-16 h-12 sm:h-16 text-red-500 mx-auto mb-4" />
+                      <h3 className="text-base sm:text-lg font-semibold text-gray-800 mb-2">
                         Cannot Load Website
                       </h3>
-                      <p className="text-gray-600 mb-4">
+                      <p className="text-gray-600 mb-4 text-sm sm:text-base">
                         {errorMessage || "Failed to load website content"}
                       </p>
-                      <div className="flex gap-2 justify-center">
+                      <div className="flex flex-col sm:flex-row gap-2 justify-center">
                         <Button
                           onClick={handlePreview}
                           variant="outline"
@@ -566,41 +665,40 @@ export default function Index() {
             </div>
             {/* Preview Info */}
             <div className="text-center mt-4 text-sm text-gray-500">
-              Showing at {Math.round(scale * 100)}% • {currentWidth} ×{" "}
+              Real-time preview at {Math.round(scale * 100)}% • {currentWidth} ×{" "}
               {currentHeight}px
             </div>
           </div>
         )}
 
-        {/* Empty State */}
+        {/* Empty State - Enhanced */}
         {!proxyUrl && (
-          <div className="bg-white rounded-lg shadow-sm border p-12 text-center">
-            <div className="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-6">
+          <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg border border-slate-200/50 p-8 sm:p-12 text-center">
+            <div className="w-16 sm:w-20 h-16 sm:h-20 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-full flex items-center justify-center mx-auto mb-6">
               <img
-                src="https://cdn.builder.io/api/v1/image/assets%2F2f9afe8dc22849b186c0fc07b1bbb4f9%2F5fe2031174b94cc7b66976474410e316?format=webp&width=800"
+                src="https://cdn.builder.io/api/v1/image/assets%2F2f9afe8dc22849b186c0fc07b1bbb4f9%2F2f9de9187e1c4134988baa17156cc2c7?format=webp&width=800"
                 alt="RespoCheck"
-                className="w-10 h-10 object-contain"
+                className="w-8 sm:w-10 h-8 sm:h-10 object-contain"
               />
             </div>
-            <h2 className="text-2xl font-semibold text-gray-900 mb-3">
+            <h2 className="text-xl sm:text-2xl font-semibold text-gray-900 mb-3">
               Test Website Responsiveness
             </h2>
-            <p className="text-gray-600 max-w-2xl mx-auto mb-6">
-              Enter a website URL above to see how it looks on different devices
-              and screen sizes. Get pixel-perfect previews with complete
-              resource loading.
+            <p className="text-gray-600 max-w-2xl mx-auto mb-6 text-sm sm:text-base">
+              Enter a website URL above to see real-time previews on different
+              devices and screen sizes. Complete with live resource crawling.
             </p>
-            <div className="flex items-center justify-center gap-8 text-sm text-gray-500">
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-8 text-sm text-gray-500">
               <div className="flex items-center gap-2">
-                <Monitor className="w-5 h-5" />
+                <Monitor className="w-4 sm:w-5 h-4 sm:h-5" />
                 Desktop & Laptops
               </div>
               <div className="flex items-center gap-2">
-                <Tablet className="w-5 h-5" />
+                <Tablet className="w-4 sm:w-5 h-4 sm:h-5" />
                 Tablets
               </div>
               <div className="flex items-center gap-2">
-                <Smartphone className="w-5 h-5" />
+                <Smartphone className="w-4 sm:w-5 h-4 sm:h-5" />
                 Mobile Phones
               </div>
             </div>
