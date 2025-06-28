@@ -47,7 +47,7 @@ export const handleProxy: RequestHandler = async (req, res) => {
             "Sec-CH-UA-Platform": '"Windows"',
           },
           redirect: "follow",
-          signal: AbortSignal.timeout(15000), // Reduced timeout for speed
+          signal: AbortSignal.timeout(5000), // Ultra-fast 5 second timeout
         });
 
         if (response.ok) {
