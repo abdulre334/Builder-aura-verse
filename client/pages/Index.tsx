@@ -130,38 +130,9 @@ export default function Index() {
   };
 
   const handleIframeLoad = () => {
-    const iframe = iframeRef.current;
-    if (iframe) {
-      setTimeout(() => {
-        try {
-          const iframeDoc =
-            iframe.contentDocument || iframe.contentWindow?.document;
-          if (iframeDoc && iframeDoc.readyState === "complete") {
-            const hasContent =
-              iframeDoc.body && iframeDoc.body.children.length > 0;
-            if (hasContent) {
-              setIsLoading(false);
-              setHasError(false);
-            } else {
-              setTimeout(() => {
-                setIsLoading(false);
-                setHasError(false);
-              }, 2000);
-            }
-          } else {
-            setTimeout(() => {
-              setIsLoading(false);
-              setHasError(false);
-            }, 3000);
-          }
-        } catch (e) {
-          setTimeout(() => {
-            setIsLoading(false);
-            setHasError(false);
-          }, 4000);
-        }
-      }, 1000);
-    }
+    // Ultra-fast loading - stop loading immediately
+    setIsLoading(false);
+    setHasError(false);
   };
 
   const openInNewTab = () => {
