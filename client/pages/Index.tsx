@@ -139,9 +139,11 @@ export default function Index() {
   };
 
   const handleIframeLoad = () => {
-    // Ultra-fast loading - stop loading immediately
-    setIsLoading(false);
-    setHasError(false);
+    // Allow complete loading - wait a bit more for all resources
+    setTimeout(() => {
+      setIsLoading(false);
+      setHasError(false);
+    }, 1000); // Small delay to ensure all resources load
   };
 
   const openInNewTab = () => {
