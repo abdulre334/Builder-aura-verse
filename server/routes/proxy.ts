@@ -37,7 +37,7 @@ export const handleProxy: RequestHandler = async (req, res) => {
             Connection: "keep-alive",
           },
           redirect: "follow",
-          signal: AbortSignal.timeout(3000), // Ultra-fast 3 second timeout
+          signal: AbortSignal.timeout(8000), // Longer timeout for complete loading
         });
 
         if (response.ok) {
