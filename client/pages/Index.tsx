@@ -97,6 +97,9 @@ export default function Index() {
     setHasError(false);
     setErrorMessage("");
 
+    // Auto-collapse sidebar on preview
+    setSidebarCollapsed(true);
+
     let formattedUrl = url.trim();
     if (
       !formattedUrl.startsWith("http://") &&
@@ -111,11 +114,11 @@ export default function Index() {
       const proxyUrlFormatted = `/api/proxy?url=${encodeURIComponent(formattedUrl)}&t=${Date.now()}`;
       setProxyUrl(proxyUrlFormatted);
 
-      // Ultra-fast loading - stop loading after 2 seconds max
+      // Allow complete loading - longer timeout for full page load
       setTimeout(() => {
         setIsLoading(false);
         setHasError(false);
-      }, 2000);
+      }, 5000); // Increased to 5 seconds for complete loading
     } catch (error) {
       setHasError(true);
       setErrorMessage("Please enter a valid URL");
