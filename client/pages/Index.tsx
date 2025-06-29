@@ -485,27 +485,101 @@ export default function Index() {
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col">
-        {/* Top Toolbar */}
-        <div className="bg-white border-b border-slate-200 px-4 py-3 shadow-sm">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              {currentUrl && (
-                <div className="flex items-center gap-2 text-sm">
-                  <Globe className="w-4 h-4 text-slate-500" />
-                  <span className="text-slate-600 truncate max-w-md">
-                    {currentUrl}
-                  </span>
-                </div>
-              )}
+        {/* Enhanced Top Toolbar with All Controls */}
+        <div className="bg-white border-b border-slate-200 shadow-sm">
+          <div className="px-4 py-3">
+            <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-3">
+              {/* URL Section */}
+              <div className="flex items-center gap-4 min-w-0 flex-1">
+                {currentUrl && (
+                  <div className="flex items-center gap-2 text-sm min-w-0">
+                    <Globe className="w-4 h-4 text-slate-500 flex-shrink-0" />
+                    <span className="text-slate-600 truncate max-w-sm">
+                      {currentUrl}
+                    </span>
+                  </div>
+                )}
+                {proxyUrl && (
+                  <Badge
+                    variant="outline"
+                    className="text-xs whitespace-nowrap"
+                  >
+                    {currentWidth} × {currentHeight}px
+                  </Badge>
+                )}
+              </div>
+
+              {/* Device Controls - Now on Top */}
               {proxyUrl && (
-                <Badge variant="outline" className="text-xs">
-                  {currentWidth} × {currentHeight}px
-                </Badge>
-              )}
-            </div>
-            <div className="flex items-center gap-2">
-              {proxyUrl && (
-                <>
+                <div className="flex flex-wrap items-center gap-2">
+                  {/* Device Category Buttons */}
+                  <div className="flex bg-slate-100 rounded-lg p-1">
+                    <button
+                      onClick={() => handleCategoryChange("desktop")}
+                      className={cn(
+                        "flex items-center gap-1 px-3 py-1 text-xs font-medium rounded transition-all",
+                        activeCategory === "desktop"
+                          ? "bg-white text-blue-600 shadow-sm"
+                          : "text-slate-600 hover:text-blue-600",
+                      )}
+                    >
+                      <Monitor className="w-3 h-3" />
+                      Desktop
+                    </button>
+                    <button
+                      onClick={() => handleCategoryChange("tablet")}
+                      className={cn(
+                        "flex items-center gap-1 px-3 py-1 text-xs font-medium rounded transition-all",
+                        activeCategory === "tablet"
+                          ? "bg-white text-blue-600 shadow-sm"
+                          : "text-slate-600 hover:text-blue-600",
+                      )}
+                    >
+                      <Tablet className="w-3 h-3" />
+                      Tablet
+                    </button>
+                    <button
+                      onClick={() => handleCategoryChange("mobile")}
+                      className={cn(
+                        "flex items-center gap-1 px-3 py-1 text-xs font-medium rounded transition-all",
+                        activeCategory === "mobile"
+                          ? "bg-white text-blue-600 shadow-sm"
+                          : "text-slate-600 hover:text-blue-600",
+                      )}
+                    >
+                      <Smartphone className="w-3 h-3" />
+                      Mobile
+                    </button>
+                  </div>
+
+                  {/* Device Selector */}
+                  <Select
+                    value={selectedDevice.id}
+                    onValueChange={(value) => {
+                      const device = devices[activeCategory].find(
+                        (d) => d.id === value,
+                      );
+                      if (device) handleDeviceSelect(device);
+                    }}
+                  >
+                    <SelectTrigger className="w-40 h-8 text-xs">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {devices[activeCategory].map((device) => (
+                        <SelectItem key={device.id} value={device.id}>
+                          <div className="flex flex-col">
+                            <span>{device.name}</span>
+                            <span className="text-xs text-slate-500">
+                              {device.width} × {device.height}
+                            </span>
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+
+                  {/* Zoom Control */}
                   <Select value={zoomLevel} onValueChange={setZoomLevel}>
                     <SelectTrigger className="w-24 h-8 text-xs">
                       <SelectValue />
@@ -518,6 +592,8 @@ export default function Index() {
                       ))}
                     </SelectContent>
                   </Select>
+
+                  {/* Rotation Button */}
                   {(activeCategory === "tablet" ||
                     activeCategory === "mobile") && (
                     <Button
@@ -530,6 +606,19 @@ export default function Index() {
                       {isRotated ? "Portrait" : "Landscape"}
                     </Button>
                   )}
+
+                  {/* Custom Size Toggle */}
+                  <Button
+                    onClick={() => setSidebarCollapsed(false)}
+                    variant="outline"
+                    size="sm"
+                    className="h-8 px-2 text-xs"
+                  >
+                    <Settings className="w-3 h-3 mr-1" />
+                    Custom
+                  </Button>
+
+                  {/* External Link */}
                   <Button
                     onClick={openInNewTab}
                     variant="outline"
@@ -539,7 +628,7 @@ export default function Index() {
                     <ExternalLink className="w-3 h-3 mr-1" />
                     Open
                   </Button>
-                </>
+                </div>
               )}
             </div>
           </div>
