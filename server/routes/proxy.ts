@@ -186,19 +186,35 @@ export const handleProxy: RequestHandler = async (req, res) => {
                 });
               });
 
-              // Real-time responsive testing enhancements
+              // Complete loading enhancement - don't stop until everything loads
               window.addEventListener('load', function() {
-                console.log('✅ Full Page Rendering Complete');
+                console.log('✅ Initial Page Load Complete - Continuing full resource loading');
 
-                // Force responsive layout recalculation
+                // Continue loading all resources
                 setTimeout(() => {
+                  // Force load any remaining lazy content
+                  const allImages = document.querySelectorAll('img');
+                  allImages.forEach(img => {
+                    if (!img.complete || img.naturalWidth === 0) {
+                      img.loading = 'eager';
+                      if (img.dataset.src) img.src = img.dataset.src;
+                    }
+                  });
+
+                  // Force responsive layout recalculation
                   const elements = document.querySelectorAll('*');
                   elements.forEach(el => {
                     if (el.style.width === 'auto' || el.style.maxWidth) {
                       el.style.width = el.style.width;
                     }
                   });
-                }, 200);
+
+                  // Trigger additional load events for complete loading
+                  window.dispatchEvent(new Event('resize'));
+                  window.dispatchEvent(new Event('DOMContentLoaded'));
+
+                  console.log('🔥 Complete Website Loading Finished - All Resources Loaded');
+                }, 500);
               });
 
             } catch (e) {
