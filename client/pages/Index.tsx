@@ -202,7 +202,7 @@ export default function Index() {
       setTimeout(() => {
         setIsLoading(false);
         setHasError(false);
-      }, 1500);
+      }, 3000); // Complete loading timeout
     }
   };
 
