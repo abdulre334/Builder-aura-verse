@@ -645,14 +645,14 @@ export default function Index() {
               <div className="relative">
                 {/* Device Frame Border */}
                 <div
-                  className="bg-slate-800 rounded-xl p-1 shadow-2xl"
+                  className="bg-slate-900 rounded-lg p-2 shadow-2xl"
                   style={{
                     width: Math.min(
-                      previewWidth + 8,
+                      previewWidth + 16,
                       window.innerWidth - (sidebarCollapsed ? 120 : 360),
                     ),
                     height: Math.min(
-                      previewHeight + 8,
+                      previewHeight + 16,
                       window.innerHeight - 180,
                     ),
                   }}
