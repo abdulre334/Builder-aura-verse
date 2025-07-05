@@ -60,7 +60,7 @@ const devices = {
 type DeviceCategory = "desktop" | "tablet" | "mobile";
 
 export default function Index() {
-  const [url, setUrl] = useState("");
+  const [url, setUrl] = useState("https://example.com");
   const [currentUrl, setCurrentUrl] = useState("");
   const [proxyUrl, setProxyUrl] = useState("");
   const [activeCategory, setActiveCategory] =
