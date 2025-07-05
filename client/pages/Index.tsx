@@ -638,24 +638,7 @@ export default function Index() {
         </div>
 
         {/* Preview Area */}
-        <div
-          className="flex-1 p-4 overflow-auto transition-all duration-500"
-          style={{
-            background: proxyUrl
-              ? `linear-gradient(135deg,
-                   rgba(29, 78, 216, 0.08) 0%,
-                   rgba(59, 130, 246, 0.06) 25%,
-                   rgba(99, 102, 241, 0.08) 50%,
-                   rgba(147, 197, 253, 0.06) 75%,
-                   rgba(29, 78, 216, 0.08) 100%)`
-              : `linear-gradient(135deg,
-                   rgba(29, 78, 216, 0.12) 0%,
-                   rgba(59, 130, 246, 0.1) 25%,
-                   rgba(99, 102, 241, 0.12) 50%,
-                   rgba(147, 197, 253, 0.1) 75%,
-                   rgba(29, 78, 216, 0.12) 100%)`,
-          }}
-        >
+        <div className="flex-1 p-4 overflow-auto bg-slate-100">
           {proxyUrl ? (
             <div className="flex justify-center items-start min-h-full">
               {/* Device Frame */}
