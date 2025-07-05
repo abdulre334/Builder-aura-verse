@@ -18,7 +18,7 @@ export const handleProxy: RequestHandler = async (req, res) => {
 
     console.log(`🔍 Ultra-fast crawling: ${targetUrl.toString()}`);
 
-    // ULTRA-FAST crawling for 4-second loading
+    // ULTRA-FAST crawling for complete loading
     let response: Response;
     let attempts = 0;
     const maxAttempts = 2;
@@ -165,52 +165,23 @@ export const handleProxy: RequestHandler = async (req, res) => {
       // Add comprehensive base tag
       .replace(/<head>/i, `<head><base href="${targetUrl.origin}/">`)
 
-<<<<<<< HEAD
-      // Inject responsive testing compatibility script for full page rendering
+      // Inject full page rendering compatibility script
       .replace(
         /<\/head>/i,
         `
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
         <style>
-          /* Full page rendering optimizations */
-          html, body {
-            overflow-x: auto !important;
-            overflow-y: auto !important;
-=======
-      // Inject full page rendering compatibility script
-      .replace(
-        /<\/head>/i,
-        `
-        <style>
           /* Full page rendering styles */
           * { box-sizing: border-box !important; }
           html, body {
->>>>>>> 45f282d50f42da766e4853922f290700ba8564dc
             width: 100% !important;
             height: 100% !important;
             margin: 0 !important;
             padding: 0 !important;
-<<<<<<< HEAD
-          }
-
-          /* Responsive testing viewport simulation */
-          * {
-            box-sizing: border-box !important;
-          }
-
-          /* Ensure full content visibility */
-          img {
-            max-width: 100% !important;
-            height: auto !important;
-          }
-
-          /* Performance optimizations for real-time viewing */
-=======
             overflow-x: auto !important;
           }
           /* Ensure fonts load properly */
->>>>>>> 45f282d50f42da766e4853922f290700ba8564dc
-          * {
+          * { 
             -webkit-font-smoothing: antialiased !important;
             text-rendering: optimizeLegibility !important;
           }
@@ -218,71 +189,23 @@ export const handleProxy: RequestHandler = async (req, res) => {
         <script>
           (function() {
             try {
-<<<<<<< HEAD
               console.log('🔥 RespoCheck: Full Page Rendering Active');
-
-              // Professional responsive testing frame protection
-=======
+              
               // Full frame-busting protection
->>>>>>> 45f282d50f42da766e4853922f290700ba8564dc
               if (window.top !== window.self) {
                 Object.defineProperty(window, 'top', { value: window.self, writable: false });
                 Object.defineProperty(window, 'parent', { value: window.self, writable: false });
                 Object.defineProperty(window, 'frameElement', { value: null, writable: false });
               }
-
-<<<<<<< HEAD
-              // Full page rendering - force load all content
-              document.addEventListener('DOMContentLoaded', function() {
-                console.log('📱 Viewport Simulation: Loading all resources');
-
-                // Force load lazy images for full page rendering
-=======
+              
               // Force load all lazy content for full page rendering
               document.addEventListener('DOMContentLoaded', function() {
                 // Load lazy images
->>>>>>> 45f282d50f42da766e4853922f290700ba8564dc
                 const lazyImages = document.querySelectorAll('img[data-src], img[data-lazy-src], img[loading="lazy"]');
                 lazyImages.forEach(function(img) {
                   if (img.dataset.src) img.src = img.dataset.src;
                   if (img.dataset.lazySrc) img.src = img.dataset.lazySrc;
                   img.loading = 'eager';
-                  img.removeAttribute('loading');
-                });
-
-                // Force load lazy iframes
-                const lazyIframes = document.querySelectorAll('iframe[data-src], iframe[loading="lazy"]');
-                lazyIframes.forEach(function(iframe) {
-                  if (iframe.dataset.src) iframe.src = iframe.dataset.src;
-                  iframe.loading = 'eager';
-                });
-
-                // Trigger responsive design updates
-                setTimeout(() => {
-                  window.dispatchEvent(new Event('resize'));
-                  window.dispatchEvent(new Event('scroll'));
-                  window.dispatchEvent(new Event('orientationchange'));
-                }, 100);
-
-                // Monitor for new content (like professional tools)
-                const observer = new MutationObserver(function(mutations) {
-                  mutations.forEach(function(mutation) {
-                    mutation.addedNodes.forEach(function(node) {
-                      if (node.nodeType === 1) {
-                        // Load any new lazy content
-                        const newLazyImages = node.querySelectorAll ? node.querySelectorAll('img[data-src], img[loading="lazy"]') : [];
-                        newLazyImages.forEach(function(img) {
-                          if (img.dataset.src) img.src = img.dataset.src;
-                          img.loading = 'eager';
-                        });
-                      }
-                    });
-                  });
-                });
-
-                observer.observe(document.body, {
-                  childList: true,
-                  subtree: true
                 });
 
                 // Load lazy iframes
@@ -299,11 +222,11 @@ export const handleProxy: RequestHandler = async (req, res) => {
                   window.dispatchEvent(new Event('load'));
                 }, 100);
               });
-
+              
               // Complete loading enhancement - don't stop until everything loads
               window.addEventListener('load', function() {
                 console.log('✅ Initial Page Load Complete - Continuing full resource loading');
-
+                
                 // Continue loading all resources
                 setTimeout(() => {
                   // Force load any remaining lazy content
@@ -314,7 +237,7 @@ export const handleProxy: RequestHandler = async (req, res) => {
                       if (img.dataset.src) img.src = img.dataset.src;
                     }
                   });
-
+                  
                   // Force responsive layout recalculation
                   const elements = document.querySelectorAll('*');
                   elements.forEach(el => {
@@ -322,15 +245,15 @@ export const handleProxy: RequestHandler = async (req, res) => {
                       el.style.width = el.style.width;
                     }
                   });
-
+                  
                   // Trigger additional load events for complete loading
                   window.dispatchEvent(new Event('resize'));
                   window.dispatchEvent(new Event('DOMContentLoaded'));
-
+                  
                   console.log('🔥 Complete Website Loading Finished - All Resources Loaded');
                 }, 500);
               });
-
+              
             } catch (e) {
               console.warn('⚠️ Responsive testing script error:', e);
             }
@@ -339,7 +262,7 @@ export const handleProxy: RequestHandler = async (req, res) => {
         </head>`,
       );
 
-    console.log(`🔧 Minimal processing complete`);
+    console.log(`🔧 Full page rendering processing complete`);
 
     // Optimal headers for iframe embedding
     res.setHeader("Content-Type", "text/html; charset=utf-8");
@@ -355,13 +278,15 @@ export const handleProxy: RequestHandler = async (req, res) => {
     // Fast cache settings
     res.setHeader("Cache-Control", "public, max-age=300");
 
-    console.log(`📤 Sending ${content.length} characters ultra-fast`);
+    console.log(
+      `📤 Sending ${content.length} characters with full page rendering`,
+    );
 
     res.send(content);
   } catch (error) {
-    console.error("💥 Ultra-fast crawling error:", error);
+    console.error("💥 Full page rendering error:", error);
     res.status(500).json({
-      error: "Ultra-fast crawling failed",
+      error: "Full page rendering failed",
       details: error instanceof Error ? error.message : "Unknown error",
       timestamp: new Date().toISOString(),
     });
