@@ -275,18 +275,20 @@ export default function Index() {
         <div className="p-4 border-b border-slate-200 bg-gradient-to-r from-blue-50 to-indigo-50">
           <div className="flex items-center justify-between">
             {!sidebarCollapsed && (
-              <a
-                href="https://respocheck.vercel.app"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-3"
-              >
-                <img
-                  src="https://cdn.builder.io/api/v1/image/assets%2F2f9afe8dc22849b186c0fc07b1bbb4f9%2F2f9de9187e1c4134988baa17156cc2c7?format=webp&width=800"
-                  alt="Website Logo"
-                  className="w-8 h-8 object-contain hover:scale-105 transition-transform cursor-pointer"
-                />
-              </a>
+              <div className="flex items-center gap-3">
+                <a
+                  href="https://respocheck.vercel.app"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-3"
+                >
+                  <img
+                    src="https://cdn.builder.io/api/v1/image/assets%2F2f9afe8dc22849b186c0fc07b1bbb4f9%2F2f9de9187e1c4134988baa17156cc2c7?format=webp&width=800"
+                    alt="Website Logo"
+                    className="w-8 h-8 object-contain hover:scale-105 transition-transform cursor-pointer"
+                  />
+                </a>
+              </div>
             )}
             <Button
               variant="ghost"
@@ -641,17 +643,17 @@ export default function Index() {
           className="flex-1 p-4 overflow-auto transition-all duration-500"
           style={{
             background: proxyUrl
-              ? `linear-gradient(135deg,
-                   rgba(29, 78, 216, 0.08) 0%,
-                   rgba(59, 130, 246, 0.06) 25%,
-                   rgba(99, 102, 241, 0.08) 50%,
-                   rgba(147, 197, 253, 0.06) 75%,
+              ? `linear-gradient(135deg, 
+                   rgba(29, 78, 216, 0.08) 0%, 
+                   rgba(59, 130, 246, 0.06) 25%, 
+                   rgba(99, 102, 241, 0.08) 50%, 
+                   rgba(147, 197, 253, 0.06) 75%, 
                    rgba(29, 78, 216, 0.08) 100%)`
-              : `linear-gradient(135deg,
-                   rgba(29, 78, 216, 0.12) 0%,
-                   rgba(59, 130, 246, 0.1) 25%,
-                   rgba(99, 102, 241, 0.12) 50%,
-                   rgba(147, 197, 253, 0.1) 75%,
+              : `linear-gradient(135deg, 
+                   rgba(29, 78, 216, 0.12) 0%, 
+                   rgba(59, 130, 246, 0.1) 25%, 
+                   rgba(99, 102, 241, 0.12) 50%, 
+                   rgba(147, 197, 253, 0.1) 75%, 
                    rgba(29, 78, 216, 0.12) 100%)`,
           }}
         >
@@ -677,7 +679,6 @@ export default function Index() {
                   <div
                     className="bg-white rounded-lg overflow-hidden relative"
                     style={{
-<<<<<<< HEAD
                       width: Math.min(
                         previewWidth,
                         window.innerWidth - (sidebarCollapsed ? 128 : 368),
@@ -739,8 +740,9 @@ export default function Index() {
                           title={`${selectedDevice.name} Viewport - ${currentWidth}x${currentHeight}`}
                           onError={handleIframeError}
                           onLoad={handleIframeLoad}
-                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                          sandbox="allow-scripts allow-same-origin allow-popups allow-forms allow-downloads"
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
+                          sandbox="allow-same-origin allow-scripts allow-forms allow-modals allow-popups allow-presentation allow-downloads"
+                          loading="eager"
                         />
 
                         {/* Device Info Overlay */}
@@ -764,22 +766,6 @@ export default function Index() {
                     </span>
                   </div>
                 </div>
-=======
-                      width: `${currentWidth}px`,
-                      height: `${currentHeight}px`,
-                      transform: `scale(${scale})`,
-                      transformOrigin: "top left",
-                      backgroundColor: "white",
-                    }}
-                    title="Website Preview"
-                    onError={handleIframeError}
-                    onLoad={handleIframeLoad}
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
-                    sandbox="allow-same-origin allow-scripts allow-forms allow-modals allow-popups allow-presentation allow-downloads"
-                    loading="eager"
-                  />
-                )}
->>>>>>> 45f282d50f42da766e4853922f290700ba8564dc
               </div>
             </div>
           ) : (
