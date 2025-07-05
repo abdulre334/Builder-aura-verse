@@ -263,7 +263,7 @@ export default function Index() {
   } = getPreviewDimensions();
 
   return (
-    <div className="h-screen flex bg-slate-50">
+    <div className="h-screen flex bg-gradient-to-br from-slate-700 via-blue-800 to-indigo-900 hover:from-slate-50 hover:via-blue-50 hover:to-indigo-50 transition-all duration-500">
       {/* Sidebar */}
       <div
         className={cn(
@@ -279,12 +279,12 @@ export default function Index() {
                 href="https://respocheck.vercel.app"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center justify-center flex-1"
+                className="flex items-center gap-3"
               >
                 <img
                   src="https://cdn.builder.io/api/v1/image/assets%2F2f9afe8dc22849b186c0fc07b1bbb4f9%2F2f9de9187e1c4134988baa17156cc2c7?format=webp&width=800"
                   alt="Website Logo"
-                  className="w-16 h-16 object-contain hover:scale-105 transition-transform cursor-pointer"
+                  className="w-8 h-8 object-contain hover:scale-105 transition-transform cursor-pointer"
                 />
               </a>
             )}
@@ -677,6 +677,7 @@ export default function Index() {
                   <div
                     className="bg-white rounded-lg overflow-hidden relative"
                     style={{
+<<<<<<< HEAD
                       width: Math.min(
                         previewWidth,
                         window.innerWidth - (sidebarCollapsed ? 128 : 368),
@@ -763,6 +764,22 @@ export default function Index() {
                     </span>
                   </div>
                 </div>
+=======
+                      width: `${currentWidth}px`,
+                      height: `${currentHeight}px`,
+                      transform: `scale(${scale})`,
+                      transformOrigin: "top left",
+                      backgroundColor: "white",
+                    }}
+                    title="Website Preview"
+                    onError={handleIframeError}
+                    onLoad={handleIframeLoad}
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
+                    sandbox="allow-same-origin allow-scripts allow-forms allow-modals allow-popups allow-presentation allow-downloads"
+                    loading="eager"
+                  />
+                )}
+>>>>>>> 45f282d50f42da766e4853922f290700ba8564dc
               </div>
             </div>
           ) : (
