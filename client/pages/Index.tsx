@@ -93,6 +93,7 @@ export default function Index() {
   const handlePreview = async () => {
     if (!url.trim()) return;
 
+    console.log("🚀 Starting preview for:", url);
     setIsLoading(true);
     setHasError(false);
     setErrorMessage("");
@@ -112,14 +113,17 @@ export default function Index() {
       new URL(formattedUrl);
       setCurrentUrl(formattedUrl);
       const proxyUrlFormatted = `/api/proxy?url=${encodeURIComponent(formattedUrl)}&t=${Date.now()}`;
+      console.log("📡 Proxy URL:", proxyUrlFormatted);
       setProxyUrl(proxyUrlFormatted);
 
       // Allow complete loading - longer timeout for full page load
       setTimeout(() => {
+        console.log("⏰ Timeout reached, stopping loading");
         setIsLoading(false);
         setHasError(false);
       }, 8000); // Increased to 8 seconds for complete loading
     } catch (error) {
+      console.error("❌ URL validation error:", error);
       setHasError(true);
       setErrorMessage("Please enter a valid URL");
       setIsLoading(false);
