@@ -263,7 +263,7 @@ export default function Index() {
   } = getPreviewDimensions();
 
   return (
-    <div className="h-screen flex bg-gradient-to-br from-slate-700 via-blue-800 to-indigo-900 hover:from-slate-50 hover:via-blue-50 hover:to-indigo-50 transition-all duration-500">
+    <div className="h-screen flex bg-slate-50">
       {/* Sidebar */}
       <div
         className={cn(
@@ -643,17 +643,17 @@ export default function Index() {
           className="flex-1 p-4 overflow-auto transition-all duration-500"
           style={{
             background: proxyUrl
-              ? `linear-gradient(135deg, 
-                   rgba(29, 78, 216, 0.08) 0%, 
-                   rgba(59, 130, 246, 0.06) 25%, 
-                   rgba(99, 102, 241, 0.08) 50%, 
-                   rgba(147, 197, 253, 0.06) 75%, 
+              ? `linear-gradient(135deg,
+                   rgba(29, 78, 216, 0.08) 0%,
+                   rgba(59, 130, 246, 0.06) 25%,
+                   rgba(99, 102, 241, 0.08) 50%,
+                   rgba(147, 197, 253, 0.06) 75%,
                    rgba(29, 78, 216, 0.08) 100%)`
-              : `linear-gradient(135deg, 
-                   rgba(29, 78, 216, 0.12) 0%, 
-                   rgba(59, 130, 246, 0.1) 25%, 
-                   rgba(99, 102, 241, 0.12) 50%, 
-                   rgba(147, 197, 253, 0.1) 75%, 
+              : `linear-gradient(135deg,
+                   rgba(29, 78, 216, 0.12) 0%,
+                   rgba(59, 130, 246, 0.1) 25%,
+                   rgba(99, 102, 241, 0.12) 50%,
+                   rgba(147, 197, 253, 0.1) 75%,
                    rgba(29, 78, 216, 0.12) 100%)`,
           }}
         >
