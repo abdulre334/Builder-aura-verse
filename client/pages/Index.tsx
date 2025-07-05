@@ -118,7 +118,7 @@ export default function Index() {
       setTimeout(() => {
         setIsLoading(false);
         setHasError(false);
-      }, 5000); // Increased to 5 seconds for complete loading
+      }, 8000); // Increased to 8 seconds for complete loading
     } catch (error) {
       setHasError(true);
       setErrorMessage("Please enter a valid URL");
