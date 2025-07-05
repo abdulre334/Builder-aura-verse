@@ -322,7 +322,7 @@ export default function Index() {
               />
               <Button
                 onClick={handlePreview}
-                disabled={!url.trim() || isLoading}
+                disabled={isLoading}
                 className="w-full h-9 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium"
               >
                 {isLoading ? "Loading Website..." : "Preview Website"}
