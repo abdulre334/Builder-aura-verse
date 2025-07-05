@@ -137,8 +137,11 @@ export default function Index() {
   };
 
   const handleIframeError = () => {
+    console.log("❌ Iframe loading error");
     setHasError(true);
-    setErrorMessage("Failed to load website in real-time");
+    setErrorMessage(
+      "Website failed to load. Try a different URL or click retry.",
+    );
     setIsLoading(false);
   };
 
