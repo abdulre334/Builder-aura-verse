@@ -37,7 +37,7 @@ export const handleProxy: RequestHandler = async (req, res) => {
             Connection: "keep-alive",
           },
           redirect: "follow",
-          signal: AbortSignal.timeout(8000), // Longer timeout for complete loading
+          signal: AbortSignal.timeout(10000), // 10 second timeout for reliable loading
         });
 
         if (response.ok) {
@@ -181,7 +181,7 @@ export const handleProxy: RequestHandler = async (req, res) => {
             overflow-x: auto !important;
           }
           /* Ensure fonts load properly */
-          * { 
+          * {
             -webkit-font-smoothing: antialiased !important;
             text-rendering: optimizeLegibility !important;
           }
@@ -190,14 +190,14 @@ export const handleProxy: RequestHandler = async (req, res) => {
           (function() {
             try {
               console.log('🔥 RespoCheck: Full Page Rendering Active');
-              
+
               // Full frame-busting protection
               if (window.top !== window.self) {
                 Object.defineProperty(window, 'top', { value: window.self, writable: false });
                 Object.defineProperty(window, 'parent', { value: window.self, writable: false });
                 Object.defineProperty(window, 'frameElement', { value: null, writable: false });
               }
-              
+
               // Force load all lazy content for full page rendering
               document.addEventListener('DOMContentLoaded', function() {
                 // Load lazy images
@@ -222,11 +222,11 @@ export const handleProxy: RequestHandler = async (req, res) => {
                   window.dispatchEvent(new Event('load'));
                 }, 100);
               });
-              
+
               // Complete loading enhancement - don't stop until everything loads
               window.addEventListener('load', function() {
                 console.log('✅ Initial Page Load Complete - Continuing full resource loading');
-                
+
                 // Continue loading all resources
                 setTimeout(() => {
                   // Force load any remaining lazy content
@@ -237,7 +237,7 @@ export const handleProxy: RequestHandler = async (req, res) => {
                       if (img.dataset.src) img.src = img.dataset.src;
                     }
                   });
-                  
+
                   // Force responsive layout recalculation
                   const elements = document.querySelectorAll('*');
                   elements.forEach(el => {
@@ -245,15 +245,15 @@ export const handleProxy: RequestHandler = async (req, res) => {
                       el.style.width = el.style.width;
                     }
                   });
-                  
+
                   // Trigger additional load events for complete loading
                   window.dispatchEvent(new Event('resize'));
                   window.dispatchEvent(new Event('DOMContentLoaded'));
-                  
+
                   console.log('🔥 Complete Website Loading Finished - All Resources Loaded');
                 }, 500);
               });
-              
+
             } catch (e) {
               console.warn('⚠️ Responsive testing script error:', e);
             }
