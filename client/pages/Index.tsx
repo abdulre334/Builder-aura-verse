@@ -320,9 +320,9 @@ export default function Index() {
               <Button
                 onClick={handlePreview}
                 disabled={!url.trim() || isLoading}
-                className="w-full h-9 bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white text-sm"
+                className="w-full h-9 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium"
               >
-                {isLoading ? "Loading..." : "Preview"}
+                {isLoading ? "Loading Website..." : "Preview Website"}
               </Button>
             </div>
           </div>
