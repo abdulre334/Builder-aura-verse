@@ -659,13 +659,13 @@ export default function Index() {
                 >
                   {/* Device Screen */}
                   <div
-                    className="bg-white rounded-lg overflow-hidden relative"
+                    className="bg-white rounded overflow-hidden relative"
                     style={{
                       width: Math.min(
                         previewWidth,
-                        window.innerWidth - (sidebarCollapsed ? 128 : 368),
+                        window.innerWidth - (sidebarCollapsed ? 136 : 376),
                       ),
-                      height: Math.min(previewHeight, window.innerHeight - 188),
+                      height: Math.min(previewHeight, window.innerHeight - 196),
                     }}
                   >
                     {isLoading ? (
