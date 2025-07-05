@@ -139,11 +139,10 @@ export default function Index() {
   };
 
   const handleIframeLoad = () => {
-    // Allow complete loading - wait a bit more for all resources
-    setTimeout(() => {
-      setIsLoading(false);
-      setHasError(false);
-    }, 1000); // Small delay to ensure all resources load
+    // Set loading to false immediately when iframe loads
+    setIsLoading(false);
+    setHasError(false);
+    console.log("✅ Website loaded successfully");
   };
 
   const openInNewTab = () => {
